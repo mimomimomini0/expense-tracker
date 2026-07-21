@@ -138,6 +138,17 @@
       "refunds": "退款作为独立系列，绝不并入分类总额。"
     }
   },
+  "dispute": {
+    "title": "争议期限——请核查标记项目",
+    "deadline": "账单 {statement}：争议窗口 {deadline} 截止（{days, plural, =0 {今天截止} other {剩 # 天}}）",
+    "nothingFlagged": "此账单未发现异常项目。",
+    "reasons": {
+      "first_seen": "首次出现的商户",
+      "foreign_currency": "外币交易",
+      "duplicate": "重复金额"
+    },
+    "note": "马来西亚信用卡账单在账单日 14 天后即具法律确定性。标记仅为核查提示——同一商户同日重复扣款也可能是真实消费。"
+  },
   "payments": {
     "title": "即将到期的还款",
     "card": "卡片",

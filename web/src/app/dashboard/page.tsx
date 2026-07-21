@@ -2,7 +2,9 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { getCards } from "@/lib/data";
 import { getDashboardData, type DashboardData, type DashboardFilters } from "@/lib/dashboard-data";
 import { getUpcomingPayments, type UpcomingPayment } from "@/lib/payments-data";
+import { getDisputeAlerts, type DisputeAlert } from "@/lib/flags-data";
 import { cardLabel, formatRM } from "@/lib/format";
+import DisputePanel from "./DisputePanel";
 import PaymentsPanel from "./PaymentsPanel";
 
 export const dynamic = "force-dynamic";
@@ -67,10 +69,11 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
   let data: DashboardData | null = null;
   let cards: Awaited<ReturnType<typeof getCards>> = [];
   let payments: UpcomingPayment[] = [];
+  let disputes: DisputeAlert[] = [];
   let loadError: string | null = null;
   try {
-    [data, cards, payments] = await Promise.all([
-      getDashboardData(filters), getCards(), getUpcomingPayments(),
+    [data, cards, payments, disputes] = await Promise.all([
+      getDashboardData(filters), getCards(), getUpcomingPayments(), getDisputeAlerts(),
     ]);
   } catch (e) {
     loadError = e instanceof Error ? e.message : String(e);
@@ -226,6 +229,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
           </div>
         )}
       </div>
+
+      <DisputePanel alerts={disputes} />
 
       <PaymentsPanel payments={payments} />
 

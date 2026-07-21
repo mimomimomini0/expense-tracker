@@ -138,6 +138,17 @@
       "refunds": "Refunds are their own series and are never netted into category totals."
     }
   },
+  "dispute": {
+    "title": "Dispute window — review flagged items",
+    "deadline": "Statement {statement}: dispute window closes {deadline} ({days, plural, =0 {today} one {# day left} other {# days left}})",
+    "nothingFlagged": "Nothing unusual flagged on this statement.",
+    "reasons": {
+      "first_seen": "first-time merchant",
+      "foreign_currency": "foreign currency",
+      "duplicate": "duplicate amount"
+    },
+    "note": "Malaysian card statements become legally conclusive 14 days after the statement date. Flags are review nudges, not accusations — same-day duplicates at one merchant are often real."
+  },
   "payments": {
     "title": "Upcoming payments",
     "card": "Card",
