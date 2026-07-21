@@ -4,9 +4,39 @@
     "dashboard": "仪表板",
     "transactions": "交易记录",
     "duedates": "还款日期",
+    "subscriptions": "订阅",
     "queue": "确认队列",
     "management": "管理",
     "onboarding": "设置"
+  },
+  "subscriptions": {
+    "title": "订阅与周期性支出",
+    "tiles": {
+      "commitment": "每月固定订阅支出",
+      "commitmentNote": "{count, plural, =0 {暂无生效中的固定订阅} other {# 个生效中的固定订阅}}",
+      "detected": "检测到的周期性商户",
+      "detectedNote": "月度周期，3 笔以上"
+    },
+    "gapNote": "缺少账单的时期（如 2025 年）会使订阅显示为已结束——上传相应账单后会自动重新连接。",
+    "sections": {
+      "subscriptions": "固定价格订阅",
+      "variable": "金额不固定的周期性支出"
+    },
+    "variableNote": "有月度周期但金额不固定——按用量计费的账单或碰巧每月光顾的商户，不计入固定订阅支出。",
+    "cols": {
+      "merchant": "商户",
+      "amount": "每月金额",
+      "cadence": "周期",
+      "charges": "扣款次数",
+      "period": "期间",
+      "status": "状态"
+    },
+    "cadence": "约 {days} 天",
+    "active": "生效中",
+    "ended": "已结束",
+    "priceChange": "价格变动：{from} → {to}",
+    "emptySubs": "未检测到固定价格订阅。",
+    "emptyVariable": "未检测到金额不固定的周期性支出。"
   },
   "management": {
     "title": "管理",

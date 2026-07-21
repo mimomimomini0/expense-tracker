@@ -40,6 +40,7 @@ export default async function RootLayout({
               <Link href="/dashboard">{tNav("dashboard")}</Link>
               <Link href="/transactions">{tNav("transactions")}</Link>
               <Link href="/duedates">{tNav("duedates")}</Link>
+              <Link href="/subscriptions">{tNav("subscriptions")}</Link>
               <Link href="/management">{tNav("management")}</Link>
               <Link href="/onboarding">{tNav("onboarding")}</Link>
             </nav>

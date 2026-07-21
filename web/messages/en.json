@@ -4,9 +4,39 @@
     "dashboard": "Dashboard",
     "transactions": "Transactions",
     "duedates": "Payment due dates",
+    "subscriptions": "Subscriptions",
     "queue": "Review queue",
     "management": "Management",
     "onboarding": "Settings"
+  },
+  "subscriptions": {
+    "title": "Subscriptions & recurring",
+    "tiles": {
+      "commitment": "Monthly recurring commitment",
+      "commitmentNote": "{count, plural, =0 {no active fixed subscriptions} one {# active fixed subscription} other {# active fixed subscriptions}}",
+      "detected": "Recurring merchants detected",
+      "detectedNote": "monthly cadence, 3+ charges"
+    },
+    "gapNote": "A recurrence shows as ended where statements are missing (e.g. the 2025 gap) — chains relink automatically when those statements are uploaded.",
+    "sections": {
+      "subscriptions": "Fixed-price subscriptions",
+      "variable": "Recurring with varying amounts"
+    },
+    "variableNote": "Monthly cadence but no fixed price — usage-based bills or coincidental monthly visits. Not counted in the commitment.",
+    "cols": {
+      "merchant": "Merchant",
+      "amount": "Typical / month",
+      "cadence": "Cadence",
+      "charges": "Charges",
+      "period": "Period",
+      "status": "Status"
+    },
+    "cadence": "~{days} days",
+    "active": "Active",
+    "ended": "Ended",
+    "priceChange": "Price changed: {from} → {to}",
+    "emptySubs": "No fixed-price subscriptions detected.",
+    "emptyVariable": "No variable recurrences detected."
   },
   "management": {
     "title": "Management",
