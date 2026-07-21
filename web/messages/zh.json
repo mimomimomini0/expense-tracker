@@ -6,6 +6,7 @@
     "duedates": "我的日历",
     "subscriptions": "订阅",
     "costs": "用卡成本",
+    "owed": "待收款",
     "queue": "确认队列",
     "management": "管理",
     "onboarding": "设置",
@@ -201,6 +202,33 @@
       "transfers": "钱包转账不计入消费总额（业主决定 Q1）。",
       "refunds": "退款作为独立系列，绝不并入分类总额。"
     }
+  },
+  "owed": {
+    "title": "待收款",
+    "empty": "暂无内容。将某笔交易归类为“代付”后，即会显示在此以便跟踪还款。",
+    "tiles": {
+      "outstanding": "未收回",
+      "outstandingNote": "{count, plural, other {# 笔未还}}",
+      "repaid": "已还清"
+    },
+    "perPerson": "按人汇总未收款",
+    "unassigned": "未指定",
+    "itemCount": "{count, plural, other {# 笔}}",
+    "outstandingTitle": "未收回",
+    "allRepaid": "已全部结清——无未收款。",
+    "repaidTitle": "已还清",
+    "cols": {
+      "date": "日期",
+      "description": "描述",
+      "amount": "金额",
+      "forWhom": "代付对象",
+      "action": "",
+      "repaidOn": "还款日期"
+    },
+    "forWhomPlaceholder": "姓名…",
+    "save": "保存",
+    "markRepaid": "标记已还",
+    "undo": "撤销"
   },
   "costs": {
     "title": "你的信用卡花了你多少钱",

@@ -937,3 +937,15 @@ table.data.coverage th.cov-th { text-align: center; }
   border: 1px solid var(--border); border-radius: 5px;
 }
 .ms-controls button:hover { background: var(--neutral-soft); }
+
+/* ---------- FR-21 Owed to me ---------- */
+.owed-people { list-style: none; margin: 0; padding: 0; }
+.owed-people li {
+  display: flex; align-items: center; gap: 0.8rem;
+  padding: 0.4rem 0; border-bottom: 1px solid var(--border); font-size: 0.9rem;
+}
+.owed-people li:last-child { border-bottom: none; }
+.owed-people .owed-name { font-weight: 600; }
+.owed-people li b { margin-left: auto; font-variant-numeric: tabular-nums; }
+.owed-table .party-form { display: flex; gap: 0.3rem; align-items: center; }
+.owed-table .party-input { width: 120px; }

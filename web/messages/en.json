@@ -6,6 +6,7 @@
     "duedates": "My calendar",
     "subscriptions": "Subscriptions",
     "costs": "Cost of credit",
+    "owed": "Owed to me",
     "queue": "Review queue",
     "management": "Management",
     "onboarding": "Settings",
@@ -201,6 +202,33 @@
       "transfers": "Wallet transfers are excluded from spending totals (owner decision Q1).",
       "refunds": "Refunds are their own series and are never netted into category totals."
     }
+  },
+  "owed": {
+    "title": "Owed to me",
+    "empty": "Nothing here yet. Categorise a transaction as \"Paying on Behalf\" and it shows up here to track repayment.",
+    "tiles": {
+      "outstanding": "Outstanding",
+      "outstandingNote": "{count, plural, one {# unpaid item} other {# unpaid items}}",
+      "repaid": "Repaid"
+    },
+    "perPerson": "Outstanding by person",
+    "unassigned": "Unassigned",
+    "itemCount": "{count, plural, one {# item} other {# items}}",
+    "outstandingTitle": "Outstanding",
+    "allRepaid": "All settled — nothing outstanding.",
+    "repaidTitle": "Repaid",
+    "cols": {
+      "date": "Date",
+      "description": "Description",
+      "amount": "Amount",
+      "forWhom": "For whom",
+      "action": "",
+      "repaidOn": "Repaid on"
+    },
+    "forWhomPlaceholder": "Name…",
+    "save": "Save",
+    "markRepaid": "Mark repaid",
+    "undo": "Undo"
   },
   "costs": {
     "title": "What your cards cost you",
