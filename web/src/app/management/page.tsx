@@ -2,6 +2,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { getSupabase } from "@/lib/supabase";
 import QueueSection from "./QueueSection";
 import MerchantBoard, { type BoardColumn } from "./MerchantBoard";
+import AliasSection from "./AliasSection";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +15,7 @@ const normalize = (s: string) => s.toUpperCase().replace(/\s+/g, " ").trim();
 export default async function ManagementPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const rawTab = Array.isArray(sp.tab) ? sp.tab[0] : sp.tab;
-  const tab = rawTab === "merchants" ? "merchants" : "confirm";
+  const tab = rawTab === "merchants" ? "merchants" : rawTab === "aliases" ? "aliases" : "confirm";
 
   const locale = await getLocale();
   const t = await getTranslations("management");
@@ -40,10 +41,15 @@ export default async function ManagementPage({ searchParams }: { searchParams: S
         <a className={tab === "merchants" ? "active" : ""} href="/management?tab=merchants">
           {t("tabs.merchants")}
         </a>
+        <a className={tab === "aliases" ? "active" : ""} href="/management?tab=aliases">
+          {t("tabs.aliases")}
+        </a>
       </nav>
 
       {tab === "confirm" ? (
         <QueueSection />
+      ) : tab === "aliases" ? (
+        <AliasSection />
       ) : loadError ? (
         <p className="error-box">{tc("loadError", { message: loadError })}</p>
       ) : (

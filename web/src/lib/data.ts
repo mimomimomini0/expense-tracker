@@ -1,6 +1,7 @@
 import "server-only";
 import { getSupabase, isMissingTableError, OWNER_USER_ID } from "./supabase";
 import { merchantKey } from "./merchant-key";
+import { canonicalOf, getAliasMap } from "./aliases";
 
 // ---------- types ----------
 
@@ -182,7 +183,13 @@ export async function getAllTransactions(filters: TxnFilters): Promise<TxnRow[]>
     if ((data ?? []).length < 1000) break;
   }
   if (filters.merchant) {
-    return rows.filter((r) => merchantKey(r.description_raw) === filters.merchant);
+    // the selected value may be a canonical name (covering several terminal
+    // spellings) or a raw key — match either
+    const aliases = await getAliasMap();
+    return rows.filter((r) => {
+      const k = merchantKey(r.description_raw);
+      return k === filters.merchant || canonicalOf(k, aliases) === filters.merchant;
+    });
   }
   return rows;
 }
@@ -192,6 +199,27 @@ export async function getAllTransactions(filters: TxnFilters): Promise<TxnRow[]>
  *  different terminal name) appear as separate keys by design; aligning them
  *  is the Management tab's job. */
 export async function getMerchantList(): Promise<{ key: string; count: number }[]> {
+  const supabase = getSupabase();
+  const aliases = await getAliasMap();
+  const counts = new Map<string, number>();
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await supabase
+      .from("transactions").select("description_raw").order("id").range(from, from + 999);
+    if (error) throw new Error(error.message);
+    for (const r of (data ?? []) as { description_raw: string }[]) {
+      // merged variants collapse under their canonical name
+      const k = canonicalOf(merchantKey(r.description_raw), aliases);
+      counts.set(k, (counts.get(k) ?? 0) + 1);
+    }
+    if ((data ?? []).length < 1000) break;
+  }
+  return [...counts.entries()]
+    .map(([key, count]) => ({ key, count }))
+    .sort((a, b) => b.count - a.count || a.key.localeCompare(b.key));
+}
+
+/** Raw (pre-alias) merchant keys with counts — feeds the merge UI. */
+export async function getRawMerchantList(): Promise<{ key: string; count: number }[]> {
   const supabase = getSupabase();
   const counts = new Map<string, number>();
   for (let from = 0; ; from += 1000) {
@@ -238,7 +266,11 @@ export async function getTransactionStats(filters: TxnFilters): Promise<TxnStats
     if ((data ?? []).length < 1000) break;
   }
   if (filters.merchant) {
-    rows = rows.filter((r) => merchantKey(r.description_raw ?? "") === filters.merchant);
+    const aliases = await getAliasMap();
+    rows = rows.filter((r) => {
+      const k = merchantKey(r.description_raw ?? "");
+      return k === filters.merchant || canonicalOf(k, aliases) === filters.merchant;
+    });
   }
   if (rows.length === 0) return null;
   const signed = rows.map((r) => (r.direction === "credit" ? -Number(r.amount_rm) : Number(r.amount_rm)));

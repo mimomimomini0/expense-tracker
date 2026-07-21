@@ -71,7 +71,19 @@
     "title": "Management",
     "tabs": {
       "confirm": "Group confirmation",
-      "merchants": "Merchants by category"
+      "merchants": "Merchants by category",
+      "aliases": "Merge & rename"
+    },
+    "aliases": {
+      "schemaMissing": "The merchant_aliases table is not set up yet — paste schema-phase2c.sql into the Supabase SQL Editor and reload.",
+      "existingTitle": "Merged merchants",
+      "noneYet": "No merges yet.",
+      "rename": "Rename",
+      "remove": "Remove from merge",
+      "createTitle": "Create a merge",
+      "createNote": "Tick the terminal-name variants that are really one merchant, give them one name, and merge. Nothing is rewritten — merges apply instantly everywhere and can be undone here.",
+      "canonical": "Merged name",
+      "merge": "Merge selected"
     },
     "board": {
       "hint": "Drag a merchant onto another category to move it — the rule and every matching transaction follow.",

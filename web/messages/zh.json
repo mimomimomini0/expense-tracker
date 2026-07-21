@@ -71,7 +71,19 @@
     "title": "管理",
     "tabs": {
       "confirm": "分组确认",
-      "merchants": "商户分类"
+      "merchants": "商户分类",
+      "aliases": "合并与重命名"
+    },
+    "aliases": {
+      "schemaMissing": "merchant_aliases 表尚未创建——请将 schema-phase2c.sql 粘贴到 Supabase SQL Editor 后刷新。",
+      "existingTitle": "已合并的商户",
+      "noneYet": "暂无合并。",
+      "rename": "重命名",
+      "remove": "从合并中移除",
+      "createTitle": "创建合并",
+      "createNote": "勾选实为同一商户的不同刷卡机名称，取一个统一名称后合并。不会改写任何数据——合并立即在各处生效，并可随时在此撤销。",
+      "canonical": "合并后名称",
+      "merge": "合并所选"
     },
     "board": {
       "hint": "将商户拖到其他分类即可移动——规则和所有匹配的交易会一起更新。",
