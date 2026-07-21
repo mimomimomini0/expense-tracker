@@ -1,0 +1,46 @@
+{
+  "_readme": "Ground truth for the Touch 'n Go input type. Values are copied from the PRINTED per-card summary lines in the sample transaction history (owner to eyeball-verify both card summary rows on the PDF). The harness asserts against this file, never against pipeline output. Amounts in RM. derived_opening_balance = card_balance + usage_total + other_charges - reload_total.",
+  "statements": [
+    {
+      "file": "TransactionHistory_153975159.pdf",
+      "provider": "Touch 'n Go",
+      "account_no": "153975159",
+      "registered_name": "LIM CHUN CHOONG",
+      "period_start": "2025-07-20",
+      "period_end": "2026-07-20",
+      "cards": [
+        {
+          "card_serial": "1113643631",
+          "reload_count": 12,
+          "reload_total": 729.50,
+          "usage_count": 183,
+          "usage_total": 667.98,
+          "other_charges": 0.00,
+          "closing_balance": 61.52,
+          "derived_opening_balance": 0.00
+        },
+        {
+          "card_serial": "2164085007",
+          "reload_count": 3,
+          "reload_total": 130.00,
+          "usage_count": 61,
+          "usage_total": 175.69,
+          "other_charges": 0.00,
+          "closing_balance": 19.50,
+          "derived_opening_balance": 65.19
+        }
+      ],
+      "assertions": [
+        "Per card: opening + reloads - usage - other charges = closing, exactly.",
+        "Every consecutive row within a card must satisfy the running-balance chain.",
+        "Usage rows are expenses; Reload rows are transfers and are NEVER counted as expenses.",
+        "Description comes from Exit Location (owner decision); Sector is the category hint."
+      ],
+      "spot_checks": [
+        { "card_serial": "1113643631", "trans_date": "2026-07-17", "type": "usage", "sector": "PARKING", "exit_contains": "SUMMERSKY SQUARE", "amount": 2.20, "balance_after": 61.52 },
+        { "card_serial": "1113643631", "trans_date": "2026-06-20", "type": "reload", "sector": "INTERNET RELOAD", "amount": 100.00, "balance_after": 109.55 },
+        { "card_serial": "1113643631", "trans_date": "2026-06-25", "type": "usage", "sector": "TOLL", "exit_contains": "JKSB", "amount": 5.74, "balance_after": 90.32 }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+.env
+node_modules/
+fixtures/pdfs/
+fixtures/extractions/
+fixtures/tng/

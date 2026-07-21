@@ -1,0 +1,82 @@
+=====================================================
+ EXPENSE TRACKER — START HERE
+=====================================================
+
+The setup script has already done the automatic work:
+folders created, PDFs moved, duplicate trap created,
+.env template ready, secrets protected by .gitignore.
+
+Only THREE things cannot be automated, because they
+need YOUR logins. Do them in order (~10 minutes):
+
+-----------------------------------------------------
+ MANUAL STEP 1 — Anthropic API key
+-----------------------------------------------------
+ 1. Go to  console.anthropic.com  and sign up / log in.
+ 2. Add billing credit (US$10–20 is plenty for Phase 1).
+ 3. Go to: API Keys -> Create Key. Copy the key.
+ 4. Open the .env file (Notepad/TextEdit) and paste it
+    after  ANTHROPIC_API_KEY=
+ RULE: the key goes in .env ONLY. Never paste it into
+ any chat, email, or website.
+
+-----------------------------------------------------
+ MANUAL STEP 2 — Supabase project
+-----------------------------------------------------
+ 1. Go to  supabase.com  and sign up (free tier is fine).
+ 2. New Project -> name it  expense-tracker
+    Region: Singapore. Set a strong database password
+    and save it in your password manager.
+ 3. Wait ~2 minutes for it to finish creating.
+ 4. Project Settings -> API. Copy two values into .env:
+      Project URL          ->  SUPABASE_URL=
+      service_role secret  ->  SUPABASE_SERVICE_ROLE_KEY=
+ 5. Save and close .env.
+
+-----------------------------------------------------
+ MANUAL STEP 3 — Claude Desktop (Claude Code)
+-----------------------------------------------------
+ 1. Download from  claude.ai/download  and install.
+ 2. Sign in, open the CODE tab.
+ 3. When asked which folder to work in, choose THIS
+    folder (expense-tracker).
+
+-----------------------------------------------------
+ FINAL STEP — Paste this message into Claude Code:
+-----------------------------------------------------
+
+Read claude-code-kickoff.md, expense-tracker-spec.md,
+and fixture-ground-truth.json in full before writing
+any code. Then build Phase 1 exactly as the kickoff
+file instructs: regression harness first, pipeline
+second, and do not stop until every assertion in
+fixture-ground-truth.json passes. My API keys are in
+.env. The fixture PDFs are in fixtures/pdfs/ — update
+the UOB filename in the ground-truth JSON to match my
+actual file (filename only; never change any number
+in that file). Ask me anything unclear before assuming.
+
+-----------------------------------------------------
+ WHILE IT WORKS
+-----------------------------------------------------
+ - Tests failing at the start is CORRECT — the harness
+   is built before the pipeline, on purpose.
+ - Before processing statements it MUST show you an
+   estimated API cost and ask permission. Say yes.
+ - If a session stops, reopen and say:
+   "continue where you left off".
+
+ HOLD THE LINE ON TWO THINGS:
+ 1. If it proposes skipping/weakening a failing test
+    to "get to green" — refuse. Fix the pipeline.
+ 2. If it wants to change a NUMBER in
+    fixture-ground-truth.json — refuse. Those values
+    are hand-verified. Filenames only.
+
+-----------------------------------------------------
+ DONE = every harness test green: all statements
+ parsed_ok, delta 0.00, both traps rejected, both
+ chains verified. Ask Claude Code for the run report
+ and bring it back to the chat for audit before
+ Phase 2 is authorized.
+=====================================================

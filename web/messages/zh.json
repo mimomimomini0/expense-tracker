@@ -1,0 +1,264 @@
+{
+  "app": { "title": "消费记账" },
+  "nav": {
+    "dashboard": "仪表板",
+    "transactions": "交易记录",
+    "duedates": "还款日期",
+    "queue": "确认队列",
+    "management": "管理",
+    "onboarding": "设置"
+  },
+  "management": {
+    "title": "管理",
+    "tabs": {
+      "confirm": "分组确认",
+      "merchants": "商户分类"
+    },
+    "board": {
+      "hint": "将商户拖到其他分类即可移动——规则和所有匹配的交易会一起更新。",
+      "empty": "暂无商户——可拖放到此处。",
+      "seeded": "预设",
+      "pillTitle": "{count, plural, other {# 笔交易}}"
+    }
+  },
+  "duedates": {
+    "title": "还款日期",
+    "listTitle": "各卡还款日",
+    "listNote": "显示每张卡最新账单周期。记录还款请到仪表板。",
+    "empty": "暂无还款日期记录。",
+    "legend": {
+      "settled": "已结清",
+      "upcoming": "即将到期",
+      "soon": "7 天内到期",
+      "overdue": "已逾期 / 今天到期"
+    }
+  },
+  "dashboard": {
+    "title": "仪表板",
+    "filters": {
+      "from": "起始日期",
+      "to": "结束日期",
+      "card": "卡片",
+      "ewallet": "电子钱包消费",
+      "ewalletOn": "包含",
+      "ewalletOff": "不包含",
+      "apply": "应用",
+      "reset": "重置",
+      "report": "下载报告",
+      "reportTitle": "按当前筛选条件生成 Excel 汇总报告"
+    },
+    "tiles": {
+      "totalSpending": "总消费",
+      "ewalletPart": "含电子钱包 {amount}",
+      "monthlyAverage": "月均消费",
+      "fees": "费用与利息",
+      "refunds": "退款",
+      "walletTransfers": "钱包转账",
+      "walletNote": "不计入消费",
+      "utilization": "信用额度使用率",
+      "utilizationDetail": "{used} / {limit}"
+    },
+    "monthly": {
+      "title": "每月支出",
+      "spending": "消费",
+      "fees": "费用与利息",
+      "refunds": "退款",
+      "month": "月份",
+      "tableToggle": "显示月度表格"
+    },
+    "categories": {
+      "title": "分类消费",
+      "centerLabel": "RM 总额",
+      "category": "分类",
+      "amount": "金额",
+      "tableToggle": "全部分类（{count}）"
+    },
+    "uncategorised": "未分类",
+    "otherCategories": "其他（{count} 个分类）"
+  },
+  "export": {
+    "transactionsSheet": "交易记录",
+    "columns": {
+      "date": "日期",
+      "card": "卡片",
+      "description": "描述",
+      "amount": "金额（RM）",
+      "currency": "货币",
+      "originalAmount": "原始金额",
+      "type": "类型",
+      "category": "分类",
+      "businessTag": "业务标签",
+      "notes": "备注"
+    }
+  },
+  "report": {
+    "sheets": {
+      "summary": "汇总",
+      "monthly": "月度",
+      "byCategory": "按分类",
+      "byCard": "按卡片",
+      "byTag": "按业务标签"
+    },
+    "period": "期间",
+    "ewalletIncluded": "其中电子钱包消费",
+    "ewalletRow": "TNG 电子钱包",
+    "columns": { "card": "卡片", "tag": "业务标签" },
+    "notes": {
+      "transfers": "钱包转账不计入消费总额（业主决定 Q1）。",
+      "refunds": "退款作为独立系列，绝不并入分类总额。"
+    }
+  },
+  "payments": {
+    "title": "即将到期的还款",
+    "card": "卡片",
+    "balance": "账单余额",
+    "minimum": "最低还款额",
+    "dueDate": "到期日",
+    "statusHead": "状态",
+    "status": {
+      "dueIn": "{days, plural, =0 {今天到期} other {# 天后到期}}",
+      "overdue": "{days, plural, other {已逾期 # 天}}",
+      "paidFull": "已全额还款",
+      "paidMinimum": "已还最低额",
+      "paidOther": "已部分还款"
+    },
+    "autoDetected": "从下期账单自动确认",
+    "manualRecorded": "由您记录",
+    "record": {
+      "button": "记录还款",
+      "full": "全额还款",
+      "minimum": "最低还款",
+      "other": "其他金额",
+      "interestNote": "未全额还款时，剩余部分将产生零售利息。",
+      "save": "保存"
+    },
+    "banner": {
+      "due": "{card}：{amount} {days, plural, =0 {今天到期} other {# 天后到期}}",
+      "overdue": "{card}：{amount} 已逾期 {days, plural, other {# 天}}"
+    }
+  },
+  "locale": { "label": "语言", "en": "EN", "zh": "中文" },
+  "theme": { "label": "主题", "light": "日间模式", "dark": "夜间模式", "system": "跟随系统" },
+  "common": {
+    "save": "保存",
+    "saving": "保存中…",
+    "personal": "个人",
+    "uncategorized": "未分类",
+    "all": "全部",
+    "missingProfileTables": "档案数据表尚未建立——请先在 Supabase SQL 编辑器中运行 schema-phase2b.sql，然后刷新本页。",
+    "loadError": "数据加载失败：{message}"
+  },
+  "txnType": {
+    "purchase": "消费",
+    "refund": "退款",
+    "payment": "还款",
+    "fee_interest": "费用/利息",
+    "instalment": "分期付款",
+    "cash_advance": "预借现金"
+  },
+  "transactions": {
+    "title": "交易记录",
+    "count": "{count, plural, =0 {没有交易} other {共 # 笔交易}}",
+    "empty": "没有符合当前筛选条件的交易。",
+    "pager": {
+      "prev": "← 较新",
+      "next": "较旧 →",
+      "pageOf": "第 {page} / {pageCount} 页"
+    },
+    "stats": {
+      "total": "总额",
+      "average": "平均每笔",
+      "highest": "最高",
+      "lowest": "最低"
+    },
+    "export": {
+      "csv": "导出 CSV",
+      "xlsx": "导出 Excel"
+    },
+    "filters": {
+      "card": "卡片",
+      "category": "分类",
+      "categoriesSelected": "{count, plural, other {已选 # 个分类}}",
+      "removeCategory": "移除 {name}",
+      "clearCategories": "全部清除",
+      "merchant": "商户",
+      "merchantPlaceholder": "输入搜索…",
+      "removeMerchant": "移除商户筛选",
+      "type": "类型",
+      "from": "开始日期",
+      "to": "结束日期",
+      "sort": "排序",
+      "apply": "应用",
+      "reset": "重置"
+    },
+    "sort": {
+      "dateDesc": "最新在前",
+      "dateAsc": "最早在前",
+      "amountDesc": "金额从高到低",
+      "amountAsc": "金额从低到高"
+    },
+    "table": {
+      "date": "日期",
+      "card": "卡片",
+      "description": "描述",
+      "amount": "金额",
+      "type": "类型",
+      "category": "分类",
+      "businessTag": "业务标签",
+      "notes": "备注"
+    },
+    "markers": {
+      "edited": "已编辑",
+      "pending": "待确认",
+      "tagOverridden": "标签已手动修改"
+    },
+    "notesPlaceholder": "添加备注…",
+    "selectCategory": "选择分类…"
+  },
+  "queue": {
+    "title": "确认队列",
+    "intro": "为每个商户组确认分类。确认后会保存一条商户规则，并将该分类应用到组内的所有交易。",
+    "empty": "队列已清空，暂无待确认项目。",
+    "groups": "{count, plural, =0 {没有商户组} other {共 # 个商户组}}",
+    "rows": "{count, plural, other {# 笔交易}}",
+    "total": "合计",
+    "sample": "交易示例",
+    "selectCategory": "选择分类…",
+    "suggested": "建议：{name}（置信度 {percent}%）",
+    "confirm": "确认整组"
+  },
+  "onboarding": {
+    "title": "档案与设置",
+    "profile": {
+      "title": "个人档案",
+      "language": "首选语言",
+      "languageEn": "English",
+      "languageZh": "简体中文",
+      "displayName": "显示名称",
+      "reminderEmail": "提醒邮箱",
+      "save": "保存档案"
+    },
+    "companies": {
+      "title": "公司",
+      "intro": "公司会作为交易的业务标签选项。归档只会在新标签中隐藏该公司，不会删除任何数据。",
+      "name": "名称",
+      "label": "标签",
+      "add": "添加公司",
+      "rename": "保存",
+      "archive": "归档",
+      "restore": "恢复",
+      "archived": "已归档",
+      "empty": "还没有公司。"
+    },
+    "cards": {
+      "title": "卡片",
+      "intro": "为每张卡片设置显示名称和默认业务标签。",
+      "card": "卡片",
+      "displayName": "显示名称",
+      "displayNamePlaceholder": "例如：Maybank 个人卡",
+      "defaultTag": "默认业务标签",
+      "save": "保存",
+      "empty": "还没有卡片——请先上传账单。"
+    }
+  }
+}

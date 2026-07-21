@@ -1,0 +1,30 @@
+{
+  "name": "expense-tracker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Credit card expense tracker — Phase 1: parse & verify pipeline with regression harness",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "cli": "tsx src/cli.ts",
+    "extract-fixtures": "tsx src/cli.ts extract-fixtures",
+    "import-fixtures": "tsx src/cli.ts import-fixtures",
+    "report": "tsx src/cli.ts report"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.112.3",
+    "@supabase/supabase-js": "^2.49.0",
+    "dotenv": "^16.4.5",
+    "luxon": "^3.5.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/luxon": "^3.4.2",
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

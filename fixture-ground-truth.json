@@ -1,0 +1,59 @@
+{
+  "_readme": "Ground truth for the Phase 1 regression harness. Every balance here was hand-verified against the source PDFs (sum of rows reconciles exactly, to the sen). The harness must assert these values after parsing — the pipeline is never allowed to grade its own homework. Amounts in RM. Negative = credit (CR) balance. All dates ISO 8601, Asia/Kuala_Lumpur.",
+  "spec_version": "1.5",
+  "cards": [
+    { "bank": "CIMB", "last4": "2225", "card_no": "4628-8802-0234-2225", "note": "Printed holder name varies: 'DEAN LIM' on 2024 statements, full legal name on 2026 — MUST resolve to one card account." },
+    { "bank": "RHB", "last4": "3799", "card_no": "4258-6083-0718-3799", "note": "Principal card. Statements also contain supplementary card 2505 sections." },
+    { "bank": "RHB", "last4": "2505", "card_no": "4258-6083-0129-2505", "note": "Supplementary of 3799, same PDF." },
+    { "bank": "UOB", "last4": "2485", "note": "Ex-Citibank format. Transactions on page 5 of 6. No posting-date column." }
+  ],
+  "statements": [
+    { "file": "eStatement20240119.pdf", "bank": "CIMB", "card": "2225", "statement_date": "2024-01-19", "due_date": "2024-02-08", "opening": 0.01, "closing": 1397.84, "minimum": 69.89,
+      "assertions": ["Opening 0.01 with a 3.69 CR payment takes running balance negative mid-cycle — no sign errors.", "Older CIMB layout: no invoice number field."] },
+    { "file": "eStatement20240219.pdf", "bank": "CIMB", "card": "2225", "statement_date": "2024-02-19", "due_date": "2024-03-11", "opening": 1397.84, "closing": 4019.91, "minimum": 201.00,
+      "assertions": ["Two payments (DUITNOW 1500.00 + Clicks 1000.00) sum 2500.00 > prior balance 1397.84 → prior cycle resolves paid_full (prepayment allowed)."] },
+    { "file": "eStatement20240319.pdf", "bank": "CIMB", "card": "2225", "statement_date": "2024-03-19", "due_date": "2024-04-08", "opening": 4019.91, "closing": 7657.09, "minimum": 382.85,
+      "assertions": ["Payment 4019.91 exactly equals prior balance → paid_full.", "TWD FX row: '901NEW TAIWAN DOLLAR 4,440.00' → amount_rm 674.65, currency TWD (numeric ISO code 901)."] },
+    { "file": "eStatement20240419.pdf", "bank": "CIMB", "card": "2225", "statement_date": "2024-04-19", "due_date": "2024-05-09", "opening": 7657.09, "closing": 5582.75, "minimum": 279.14,
+      "assertions": ["CRITICAL REFUND FIXTURE: two Lazada CR rows 3090.31 and 3229.74 (posting 21 MAR) reverse purchases from the PRIOR statement — both typed refund, NOT payment.", "Payment auto-detection for the Mar cycle must exclude these 6320.05 of refunds; actual payments this statement: 1240.00 + 1023.90.", "FINANCE CHARGES 33.80 typed fee_interest."] },
+    { "file": "eStatement20240519.pdf", "bank": "CIMB", "card": "2225", "statement_date": "2024-05-19", "due_date": "2024-06-10", "opening": 5582.75, "closing": 973.25, "minimum": 50.00,
+      "assertions": ["Mid-cycle payment 128.92 exactly zeroes accrued spend at that point.", "FINANCE CHARGES 5.49 typed fee_interest."] },
+    { "file": "eStatement20240619.pdf", "bank": "CIMB", "card": "2225", "statement_date": "2024-06-19", "due_date": "2024-07-09", "opening": 973.25, "closing": 923.89, "minimum": 50.00,
+      "assertions": ["Three payments: 600.00 (DUITNOW) + 600.00 (Clicks) same day 03 JUN via different channels + 1990.00 (13 JUN) — three separate payment rows.", "HKD FX row: '344HONG KONG DOLLAR 40.00' → amount_rm 24.53, currency HKD (numeric ISO code 344)."] },
+    { "file": "eStatement20260519.pdf", "bank": "CIMB", "card": "2225", "statement_date": "2026-05-19", "due_date": "2026-06-08", "opening": 7321.60, "closing": 13374.87, "minimum": 1034.82,
+      "assertions": ["31 transaction rows. LATE CHARGES 71.83 and FINANCE CHARGES 120.57 typed fee_interest.", "Two-line FX: Alipay*Taobao → amount_rm 443.36, original CNY 749.22 (RM stored as amount, CNY as metadata).", "Promo text interleaved between rows must not become transactions."] },
+    { "file": "eStatement20260619.pdf", "bank": "CIMB", "card": "2225", "statement_date": "2026-06-19", "due_date": "2026-07-09", "opening": 13374.87, "closing": 4496.28, "minimum": 224.81,
+      "assertions": ["Four payments in one cycle: CASH PAYMENT AT D591 3900.00, DUITNOW TO ACCOUNT 2800.00, Clicks 9000.00, Clicks 3515.66 — all typed payment (CASH PAYMENT is CR → payment, never cash_advance).", "Cumulative payments vs prior balance 13374.87 drive payment status.", "FINANCE CHARGES 11.16 typed fee_interest."] },
+    { "file": "RHB_4258608307183799_20260101.pdf", "bank": "RHB", "card": "3799", "statement_date": "2026-01-15", "due_date": "2026-02-04", "opening": -127.02, "closing": 922.83, "minimum": 50.00,
+      "assertions": ["CRITICAL: opening balance printed '127.02 CR' — stored NEGATIVE; -127.02 + 1049.85 debits = 922.83 exactly.", "YEAR BOUNDARY: transactions dated 16-30 Dec resolve to December 2025; Jan transactions to 2026.", "Supplementary card 2505 section: 3 purchases (74.10, 27.10, 134.20) + payment 235.40 CR → closes 0.00; all four rows captured under card 2505."] },
+    { "file": "RHB_4258608307183799_20260201.pdf", "bank": "RHB", "card": "3799", "statement_date": "2026-02-15", "due_date": "2026-03-07", "opening": 922.83, "closing": 37.71, "minimum": 37.71,
+      "assertions": ["Due date '07/03/2026' resolves to 7 Mar (20 days after statement), never 3 Jul."] },
+    { "file": "RHB_4258608307183799_20260301.pdf", "bank": "RHB", "card": "3799", "statement_date": "2026-03-15", "due_date": "2026-04-04", "opening": 37.71, "closing": 304.00, "minimum": 50.00,
+      "assertions": ["Supplementary card 2505: zero activity, opening 0.00 = closing 0.00 — section parsed, no phantom rows."] },
+    { "file": "RHB_4258608307183799_20260401.pdf", "bank": "RHB", "card": "3799", "statement_date": "2026-04-15", "due_date": "2026-05-05", "opening": 304.00, "closing": 1345.80, "minimum": 67.29,
+      "assertions": ["CARD SERVICE TAX 25.00 typed fee_interest.", "Due date 05/05/2026 is palindromic in dd/mm — both readings identical, must parse without a flag."] },
+    { "file": "RHB_4258608307183799_20260501.pdf", "bank": "RHB", "card": "3799", "statement_date": "2026-05-15", "due_date": "2026-06-04", "opening": 1345.80, "closing": 10252.94, "minimum": 776.51,
+      "assertions": ["INSTALMENT: 'EP-OGAWA-36MTHS : 01/36' row 277.75 typed instalment; plan created: principal 9999.00, total 36 months, outstanding 9721.25.", "Two-line FX rows WEIXIN (CNY 5572.63 → 3306.82) and ALP*Ctrip (CNY 6778.55 → 4022.42).", "Supp card 2505: CARD SERVICE TAX 25.00 + payment 25.00 CR → closes 0.00."] },
+    { "file": "RHB_4258608307183799_20260601.pdf", "bank": "RHB", "card": "3799", "statement_date": "2026-06-15", "due_date": "2026-07-05", "opening": 10252.94, "closing": 466.11, "minimum": 287.17,
+      "assertions": ["INSTALMENT progression: 02/36, outstanding 9443.50 — plan record UPDATED, not duplicated.", "NOTE: this file is uploaded TWICE in the fixture batch — the second copy must be rejected as duplicate (file hash), nothing overwritten or double-inserted."] },
+    { "file": "RHB_4258608307183799_20260701.pdf", "bank": "RHB", "card": "3799", "statement_date": "2026-07-15", "due_date": "2026-08-04", "opening": 466.11, "closing": 513.36, "minimum": 289.53,
+      "assertions": ["INSTALMENT progression: 03/36, outstanding 9165.75.", "Refund fixture: WEIXIN*China Housing CR 470.57 (merchant-named CR) typed refund, not payment.", "Two payments: 150.00 + 320.00 (PYMT VIA SA/CA).", "Due date '04/08/2026' = 4 Aug, never 8 Apr."] },
+    { "file": "eStatement_31263.924003865075.pdf", "bank": "UOB", "card": "2485", "statement_date": "2026-07-08", "due_date": "2026-07-28", "opening": 35.38, "closing": 38.78,
+      "assertions": ["Transactions on page 5 of 6 — extraction must not assume position.", "8 retail rows sum 203.40 (matches printed Retail Purchase total — secondary cross-check) + payment 200.00 CR.", "No posting-date column — posting date nullable."] }
+  ],
+  "traps": [
+    { "file": "RHB_20705500033467_20260601.pdf", "expected": "REJECTED at document-type gate", "reason": "Business CURRENT ACCOUNT statement (deposit-account layout, running balance column) — NOT a credit card statement. Zero records committed; clear 'not a credit card statement' error." },
+    { "file": "duplicate upload of RHB_4258608307183799_20260601.pdf", "expected": "REJECTED as duplicate by file hash", "reason": "Deliberate duplicate in the batch; existing data never overwritten or double-inserted." }
+  ],
+  "chains": [
+    { "card": "CIMB 2225", "unbroken": ["2024-01-19", "2024-02-19", "2024-03-19", "2024-04-19", "2024-05-19", "2024-06-19"], "then_gap": "Jul 2024 through Apr 2026 statements missing — chain checker MUST flag this gap between 2024-06-19 and 2026-05-19, and the warnings must auto-clear as intervening statements are later uploaded. 2026-05-19 → 2026-06-19 link is unbroken." },
+    { "card": "RHB 3799", "unbroken": ["2026-01-15", "2026-02-15", "2026-03-15", "2026-04-15", "2026-05-15", "2026-06-15", "2026-07-15"], "note": "Earliest statement (2026-01-15) exempt from backward check. Closings: 922.83, 37.71, 304.00, 1345.80, 10252.94, 466.11, 513.36 — each equals next opening." }
+  ],
+  "harness_rules": [
+    "Every statement must reach status parsed_ok with reconciliation_delta exactly 0.00 — computed from extracted (immutable) values.",
+    "Assert opening/closing/due/minimum against this file, not against pipeline output.",
+    "Run the full suite on every code change (CI). A corrupted-copy test (one amount altered in any fixture) must land in needs_review, never parsed_ok.",
+    "Out-of-order import test: shuffle upload order; final state must be identical, chain warnings resolved.",
+    "All date assertions evaluated in Asia/Kuala_Lumpur."
+  ]
+}

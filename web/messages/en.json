@@ -1,0 +1,264 @@
+{
+  "app": { "title": "Expense Tracker" },
+  "nav": {
+    "dashboard": "Dashboard",
+    "transactions": "Transactions",
+    "duedates": "Payment due dates",
+    "queue": "Review queue",
+    "management": "Management",
+    "onboarding": "Settings"
+  },
+  "management": {
+    "title": "Management",
+    "tabs": {
+      "confirm": "Group confirmation",
+      "merchants": "Merchants by category"
+    },
+    "board": {
+      "hint": "Drag a merchant onto another category to move it — the rule and every matching transaction follow.",
+      "empty": "No merchants yet — drop one here.",
+      "seeded": "seeded",
+      "pillTitle": "{count, plural, one {# transaction} other {# transactions}}"
+    }
+  },
+  "duedates": {
+    "title": "Payment due dates",
+    "listTitle": "Due dates by card",
+    "listNote": "Each card's latest statement cycle. Recording payments happens on the dashboard.",
+    "empty": "No due dates on record yet.",
+    "legend": {
+      "settled": "Settled",
+      "upcoming": "Upcoming",
+      "soon": "Due within 7 days",
+      "overdue": "Overdue / due now"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "filters": {
+      "from": "From",
+      "to": "To",
+      "card": "Card",
+      "ewallet": "E-wallet spending",
+      "ewalletOn": "Included",
+      "ewalletOff": "Excluded",
+      "apply": "Apply",
+      "reset": "Reset",
+      "report": "Download report",
+      "reportTitle": "Excel summary report for the current filters"
+    },
+    "tiles": {
+      "totalSpending": "Total spending",
+      "ewalletPart": "incl. {amount} e-wallet",
+      "monthlyAverage": "Monthly average",
+      "fees": "Fees & interest",
+      "refunds": "Refunds",
+      "walletTransfers": "Wallet transfers",
+      "walletNote": "excluded from spending",
+      "utilization": "Credit utilization",
+      "utilizationDetail": "{used} of {limit}"
+    },
+    "monthly": {
+      "title": "Monthly outflow",
+      "spending": "Spending",
+      "fees": "Fees & interest",
+      "refunds": "Refunds",
+      "month": "Month",
+      "tableToggle": "Show monthly table"
+    },
+    "categories": {
+      "title": "Spending by category",
+      "centerLabel": "RM total",
+      "category": "Category",
+      "amount": "Amount",
+      "tableToggle": "All categories ({count})"
+    },
+    "uncategorised": "Uncategorised",
+    "otherCategories": "Other ({count} categories)"
+  },
+  "export": {
+    "transactionsSheet": "Transactions",
+    "columns": {
+      "date": "Date",
+      "card": "Card",
+      "description": "Description",
+      "amount": "Amount (RM)",
+      "currency": "Currency",
+      "originalAmount": "Original amount",
+      "type": "Type",
+      "category": "Category",
+      "businessTag": "Business tag",
+      "notes": "Notes"
+    }
+  },
+  "report": {
+    "sheets": {
+      "summary": "Summary",
+      "monthly": "Monthly",
+      "byCategory": "By category",
+      "byCard": "By card",
+      "byTag": "By business tag"
+    },
+    "period": "Period",
+    "ewalletIncluded": "of which e-wallet spending",
+    "ewalletRow": "TNG eWallet",
+    "columns": { "card": "Card", "tag": "Business tag" },
+    "notes": {
+      "transfers": "Wallet transfers are excluded from spending totals (owner decision Q1).",
+      "refunds": "Refunds are their own series and are never netted into category totals."
+    }
+  },
+  "payments": {
+    "title": "Upcoming payments",
+    "card": "Card",
+    "balance": "Statement balance",
+    "minimum": "Minimum due",
+    "dueDate": "Due date",
+    "statusHead": "Status",
+    "status": {
+      "dueIn": "{days, plural, =0 {Due today} one {Due in # day} other {Due in # days}}",
+      "overdue": "{days, plural, one {Overdue by # day} other {Overdue by # days}}",
+      "paidFull": "Paid in full",
+      "paidMinimum": "Minimum paid",
+      "paidOther": "Partially paid"
+    },
+    "autoDetected": "detected from the next statement",
+    "manualRecorded": "recorded by you",
+    "record": {
+      "button": "Record payment",
+      "full": "Full payment",
+      "minimum": "Minimum",
+      "other": "Other amount",
+      "interestNote": "Paying less than the full balance accrues retail interest on the remainder.",
+      "save": "Save"
+    },
+    "banner": {
+      "due": "{card}: {amount} due in {days, plural, =0 {today} one {# day} other {# days}}",
+      "overdue": "{card}: {amount} is {days, plural, one {# day} other {# days}} overdue"
+    }
+  },
+  "locale": { "label": "Language", "en": "EN", "zh": "中文" },
+  "theme": { "label": "Theme", "light": "Day mode", "dark": "Dark mode", "system": "System mode" },
+  "common": {
+    "save": "Save",
+    "saving": "Saving…",
+    "personal": "Personal",
+    "uncategorized": "Uncategorized",
+    "all": "All",
+    "missingProfileTables": "Profile tables are not set up yet — run schema-phase2b.sql in the Supabase SQL editor, then reload this page.",
+    "loadError": "Could not load data: {message}"
+  },
+  "txnType": {
+    "purchase": "Purchase",
+    "refund": "Refund",
+    "payment": "Payment",
+    "fee_interest": "Fee / interest",
+    "instalment": "Instalment",
+    "cash_advance": "Cash advance"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "count": "{count, plural, =0 {No transactions} one {# transaction} other {# transactions}}",
+    "empty": "No transactions match the current filters.",
+    "pager": {
+      "prev": "← Newer",
+      "next": "Older →",
+      "pageOf": "Page {page} of {pageCount}"
+    },
+    "stats": {
+      "total": "Total",
+      "average": "Average / transaction",
+      "highest": "Highest",
+      "lowest": "Lowest"
+    },
+    "export": {
+      "csv": "Export CSV",
+      "xlsx": "Export Excel"
+    },
+    "filters": {
+      "card": "Card",
+      "category": "Category",
+      "categoriesSelected": "{count, plural, one {# category} other {# categories}}",
+      "removeCategory": "Remove {name}",
+      "clearCategories": "Clear all",
+      "merchant": "Merchant",
+      "merchantPlaceholder": "Type to search…",
+      "removeMerchant": "Remove merchant filter",
+      "type": "Type",
+      "from": "From",
+      "to": "To",
+      "sort": "View",
+      "apply": "Apply",
+      "reset": "Reset"
+    },
+    "sort": {
+      "dateDesc": "Newest first",
+      "dateAsc": "Oldest first",
+      "amountDesc": "Highest amount",
+      "amountAsc": "Lowest amount"
+    },
+    "table": {
+      "date": "Date",
+      "card": "Card",
+      "description": "Description",
+      "amount": "Amount",
+      "type": "Type",
+      "category": "Category",
+      "businessTag": "Business tag",
+      "notes": "Notes"
+    },
+    "markers": {
+      "edited": "Edited",
+      "pending": "Pending confirmation",
+      "tagOverridden": "Tag overridden"
+    },
+    "notesPlaceholder": "Add a note…",
+    "selectCategory": "Choose category…"
+  },
+  "queue": {
+    "title": "Confirmation queue",
+    "intro": "Confirm a category for each merchant group. Confirming saves a merchant rule and applies the category to every transaction in the group.",
+    "empty": "Nothing to confirm — the queue is clear.",
+    "groups": "{count, plural, =0 {No merchant groups} one {# merchant group} other {# merchant groups}}",
+    "rows": "{count, plural, one {# transaction} other {# transactions}}",
+    "total": "Total",
+    "sample": "Sample transactions",
+    "selectCategory": "Choose category…",
+    "suggested": "Suggested: {name} ({percent}% confidence)",
+    "confirm": "Confirm group"
+  },
+  "onboarding": {
+    "title": "Profile & settings",
+    "profile": {
+      "title": "Profile",
+      "language": "Preferred language",
+      "languageEn": "English",
+      "languageZh": "简体中文",
+      "displayName": "Display name",
+      "reminderEmail": "Reminder email",
+      "save": "Save profile"
+    },
+    "companies": {
+      "title": "Companies",
+      "intro": "Companies are offered as business tags on transactions. Archiving hides a company from new tags; nothing is ever deleted.",
+      "name": "Name",
+      "label": "Label",
+      "add": "Add company",
+      "rename": "Save",
+      "archive": "Archive",
+      "restore": "Restore",
+      "archived": "Archived",
+      "empty": "No companies yet."
+    },
+    "cards": {
+      "title": "Cards",
+      "intro": "Set a display name and a default business tag for each card.",
+      "card": "Card",
+      "displayName": "Display name",
+      "displayNamePlaceholder": "e.g. Maybank personal",
+      "defaultTag": "Default business tag",
+      "save": "Save",
+      "empty": "No cards yet — upload a statement first."
+    }
+  }
+}
