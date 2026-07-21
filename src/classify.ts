@@ -30,6 +30,7 @@ export const CATEGORIES = [
   "Travel Expenses",
   "Gift & Donation",
   "Dispute",
+  "Medical",
   "Paying on Behalf", "Bank Fees & Interest", "Refunds",
   // owner decision Q1 (2026-07-20): e-wallet top-ups are transfers, excluded
   // from spending totals in reports (like payments), shown as their own line
