@@ -3,6 +3,7 @@ import { getSupabase } from "@/lib/supabase";
 import QueueSection from "./QueueSection";
 import MerchantBoard, { type BoardColumn } from "./MerchantBoard";
 import AliasSection from "./AliasSection";
+import CategorySection from "./CategorySection";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,10 @@ const normalize = (s: string) => s.toUpperCase().replace(/\s+/g, " ").trim();
 export default async function ManagementPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const rawTab = Array.isArray(sp.tab) ? sp.tab[0] : sp.tab;
-  const tab = rawTab === "merchants" ? "merchants" : rawTab === "aliases" ? "aliases" : "confirm";
+  const tab = ["merchants", "aliases", "categories"].includes(rawTab ?? "")
+    ? (rawTab as "merchants" | "aliases" | "categories")
+    : "confirm";
+  const errParam = Array.isArray(sp.error) ? sp.error[0] : sp.error;
 
   const locale = await getLocale();
   const t = await getTranslations("management");
@@ -44,12 +48,17 @@ export default async function ManagementPage({ searchParams }: { searchParams: S
         <a className={tab === "aliases" ? "active" : ""} href="/management?tab=aliases">
           {t("tabs.aliases")}
         </a>
+        <a className={tab === "categories" ? "active" : ""} href="/management?tab=categories">
+          {t("tabs.categories")}
+        </a>
       </nav>
 
       {tab === "confirm" ? (
         <QueueSection />
       ) : tab === "aliases" ? (
         <AliasSection />
+      ) : tab === "categories" ? (
+        <CategorySection error={errParam ?? null} />
       ) : loadError ? (
         <p className="error-box">{tc("loadError", { message: loadError })}</p>
       ) : (

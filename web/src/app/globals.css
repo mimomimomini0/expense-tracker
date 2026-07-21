@@ -885,3 +885,9 @@ table.data.api-costs { min-width: 0; }
 }
 .merge-list .multiselect-option { justify-content: space-between; }
 .merge-list .desc-raw { flex: 1; }
+
+.dismiss-form { margin-left: auto; }
+.dismiss-btn { font-size: 0.7rem; padding: 0.15rem 0.5rem; }
+.btn-secondary.danger { color: var(--danger); border-color: var(--danger); }
+.cat-row { border-bottom: none; padding: 0; flex: 1; }
+

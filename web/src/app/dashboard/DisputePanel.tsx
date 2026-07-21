@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import type { DisputeAlert } from "@/lib/flags-data";
 import { formatRM } from "@/lib/format";
+import { dismissDisputeFlag } from "./actions";
 
 /** FR-18: "Dispute window closes [date] — review flagged items now."
  *  Rendered only while at least one statement's 14-day window is open. */
@@ -32,6 +33,12 @@ export default async function DisputePanel({ alerts }: { alerts: DisputeAlert[] 
                       <span key={r} className="chip pending">{t(`reasons.${r}`)}</span>
                     ))}
                   </span>
+                  <form action={dismissDisputeFlag} className="dismiss-form">
+                    <input type="hidden" name="txnId" value={f.id} />
+                    <button type="submit" className="btn-secondary dismiss-btn">
+                      {t("dismiss")}
+                    </button>
+                  </form>
                 </li>
               ))}
             </ul>

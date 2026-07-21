@@ -72,7 +72,22 @@
     "tabs": {
       "confirm": "分组确认",
       "merchants": "商户分类",
-      "aliases": "合并与重命名"
+      "aliases": "合并与重命名",
+      "categories": "分类管理"
+    },
+    "categories": {
+      "listTitle": "分类",
+      "note": "可重命名任何分类（两种语言）。只有未被使用的分类才能删除——请先重新归类或调整规则。",
+      "save": "保存",
+      "used": "{count, plural, =0 {未使用} other {# 笔交易}}",
+      "delete": "删除",
+      "addTitle": "新增分类",
+      "nameEn": "英文名称",
+      "add": "添加",
+      "errors": {
+        "duplicate": "已存在同名英文分类。",
+        "inuse": "该分类仍被交易或商户规则使用——请先重新归类。"
+      }
     },
     "aliases": {
       "schemaMissing": "merchant_aliases 表尚未创建——请将 schema-phase2c.sql 粘贴到 Supabase SQL Editor 后刷新。",
@@ -213,7 +228,8 @@
       "foreign_currency": "外币交易",
       "duplicate": "重复金额"
     },
-    "note": "马来西亚信用卡账单在账单日 14 天后即具法律确定性。标记仅为核查提示——同一商户同日重复扣款也可能是真实消费。"
+    "note": "马来西亚信用卡账单在账单日 14 天后即具法律确定性。标记仅为核查提示——同一商户同日重复扣款也可能是真实消费。",
+    "dismiss": "知道了"
   },
   "payments": {
     "title": "即将到期的还款",

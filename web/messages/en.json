@@ -72,7 +72,22 @@
     "tabs": {
       "confirm": "Group confirmation",
       "merchants": "Merchants by category",
-      "aliases": "Merge & rename"
+      "aliases": "Merge & rename",
+      "categories": "Categories"
+    },
+    "categories": {
+      "listTitle": "Categories",
+      "note": "Rename any category (both languages). Delete is available only while nothing uses it — recategorise or re-map first.",
+      "save": "Save",
+      "used": "{count, plural, =0 {unused} one {# transaction} other {# transactions}}",
+      "delete": "Delete",
+      "addTitle": "Add new category",
+      "nameEn": "English name",
+      "add": "Add",
+      "errors": {
+        "duplicate": "A category with that English name already exists.",
+        "inuse": "That category is still used by transactions or merchant rules — re-map them first."
+      }
     },
     "aliases": {
       "schemaMissing": "The merchant_aliases table is not set up yet — paste schema-phase2c.sql into the Supabase SQL Editor and reload.",
@@ -213,7 +228,8 @@
       "foreign_currency": "foreign currency",
       "duplicate": "duplicate amount"
     },
-    "note": "Malaysian card statements become legally conclusive 14 days after the statement date. Flags are review nudges, not accusations — same-day duplicates at one merchant are often real."
+    "note": "Malaysian card statements become legally conclusive 14 days after the statement date. Flags are review nudges, not accusations — same-day duplicates at one merchant are often real.",
+    "dismiss": "Dismiss"
   },
   "payments": {
     "title": "Upcoming payments",

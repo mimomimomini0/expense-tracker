@@ -3,6 +3,20 @@
 import { revalidatePath } from "next/cache";
 import { getSupabase } from "@/lib/supabase";
 
+/** FR-18: owner reviewed a flagged row and cleared it. The edit_log row IS
+ *  the audit trail of that review. */
+export async function dismissDisputeFlag(formData: FormData): Promise<void> {
+  const id = Number(formData.get("txnId"));
+  if (!Number.isFinite(id)) throw new Error("bad transaction id");
+  const { error } = await getSupabase().from("edit_log").insert({
+    entity: "transaction", entity_id: id,
+    field: "dispute_flag", old_value: "flagged", new_value: "dismissed",
+    action: "edit",
+  });
+  if (error) throw new Error(error.message);
+  revalidatePath("/dashboard");
+}
+
 /** FR-9 payment recording. Full / minimum / other — the amounts come from the
  *  cycle row itself, never from hidden form fields. A cycle whose payment was
  *  AUTO-DETECTED from statement evidence is immutable here. Re-recording a

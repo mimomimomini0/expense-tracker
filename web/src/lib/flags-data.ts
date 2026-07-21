@@ -40,5 +40,17 @@ export async function getDisputeAlerts(): Promise<DisputeAlert[]> {
     }
     if ((data ?? []).length < 1000) break;
   }
-  return computeDisputeAlerts(txns, klToday());
+  const alerts = computeDisputeAlerts(txns, klToday());
+
+  // drop rows the owner already reviewed & dismissed (stored in edit_log —
+  // the dismissal IS the audit record of that review)
+  const dismissed = new Set<number>();
+  const dq = await supabase.from("edit_log")
+    .select("entity_id").eq("entity", "transaction")
+    .eq("field", "dispute_flag").eq("new_value", "dismissed");
+  if (!dq.error) for (const r of dq.data ?? []) dismissed.add(r.entity_id as number);
+  for (const a of alerts) {
+    a.flagged = a.flagged.filter((f) => !dismissed.has(f.id));
+  }
+  return alerts;
 }
