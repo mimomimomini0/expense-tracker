@@ -17,6 +17,22 @@ export async function dismissDisputeFlag(formData: FormData): Promise<void> {
   revalidatePath("/dashboard");
 }
 
+/** Dismiss EVERY flagged row of one statement at once (owner request). */
+export async function dismissAllDisputeFlags(formData: FormData): Promise<void> {
+  const ids = String(formData.get("txnIds") ?? "")
+    .split(",").map(Number).filter(Number.isFinite);
+  if (ids.length === 0) return;
+  const { error } = await getSupabase().from("edit_log").insert(
+    ids.map((id) => ({
+      entity: "transaction", entity_id: id,
+      field: "dispute_flag", old_value: "flagged", new_value: "dismissed",
+      action: "edit",
+    })),
+  );
+  if (error) throw new Error(error.message);
+  revalidatePath("/dashboard");
+}
+
 /** FR-9 payment recording. Full / minimum / other — the amounts come from the
  *  cycle row itself, never from hidden form fields. A cycle whose payment was
  *  AUTO-DETECTED from statement evidence is immutable here. Re-recording a

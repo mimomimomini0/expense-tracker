@@ -3,14 +3,16 @@ import {
   getDueDatesInRange, getUpcomingPayments, klToday,
   type DueDateEntry, type UpcomingPayment,
 } from "@/lib/payments-data";
+import { getStatementCoverage, type CoverageYear } from "@/lib/coverage-data";
 import { formatRM } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-/** "Payment due dates" tab (owner request 2026-07-21): a month calendar with
- *  each card's due date marked, beside the per-card due list. All date
+/** "My calendar" (owner request 2026-07-21): an enlarged month calendar with
+ *  each card's due date marked, the per-card due list, and a statement-upload
+ *  coverage matrix below so a missing statement stands out. All date
  *  arithmetic in Asia/Kuala_Lumpur. Weeks start Monday. */
 export default async function DueDatesPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
@@ -33,11 +35,13 @@ export default async function DueDatesPage({ searchParams }: { searchParams: Sea
 
   let entries: DueDateEntry[] = [];
   let list: UpcomingPayment[] = [];
+  let coverage: CoverageYear[] = [];
   let loadError: string | null = null;
   try {
-    [entries, list] = await Promise.all([
+    [entries, list, coverage] = await Promise.all([
       getDueDatesInRange(firstIso, lastIso),
       getUpcomingPayments(),
+      getStatementCoverage(),
     ]);
   } catch (e) {
     loadError = e instanceof Error ? e.message : String(e);
@@ -69,6 +73,9 @@ export default async function DueDatesPage({ searchParams }: { searchParams: Sea
   const weekdays = Array.from({ length: 7 }, (_, i) =>
     new Date(Date.UTC(2024, 0, 1 + i)).toLocaleDateString(dtLocale, { weekday: "short", timeZone: "UTC" }),
   );
+  const monthNames = Array.from({ length: 12 }, (_, i) =>
+    new Date(Date.UTC(2024, i, 1)).toLocaleDateString(dtLocale, { month: "short", timeZone: "UTC" }),
+  );
 
   const cells: (number | null)[] = [
     ...Array.from({ length: leading }, () => null),
@@ -83,6 +90,9 @@ export default async function DueDatesPage({ searchParams }: { searchParams: Sea
     : p.daysRemaining < 0 ? tp("status.overdue", { days: -p.daysRemaining })
     : tp("status.dueIn", { days: p.daysRemaining });
 
+  // a "usual" month has ~3 statements (CIMB + RHB + UOB); flag below that
+  const USUAL = 3;
+
   return (
     <>
       <h1>{t("title")}</h1>
@@ -93,7 +103,7 @@ export default async function DueDatesPage({ searchParams }: { searchParams: Sea
             <h2>{monthTitle}</h2>
             <a className="btn-secondary" href={`/duedates?month=${next}`}>→</a>
           </div>
-          <div className="calendar-grid">
+          <div className="calendar-grid big">
             {weekdays.map((w) => (
               <div key={w} className="cal-weekday">{w}</div>
             ))}
@@ -146,6 +156,51 @@ export default async function DueDatesPage({ searchParams }: { searchParams: Sea
           <p className="stat-sub">{t("listNote")}</p>
         </section>
       </div>
+
+      <section className="viz-card coverage-card">
+        <h2>{t("coverage.title")}</h2>
+        <p className="inline-note">{t("coverage.note")}</p>
+        <div className="table-wrap">
+          <table className="data mini coverage">
+            <thead>
+              <tr>
+                <th>{t("coverage.year")}</th>
+                {monthNames.map((mn) => (<th key={mn} className="cov-th">{mn}</th>))}
+                <th className="amount-cell">{t("coverage.total")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {coverage.length === 0 ? (
+                <tr><td colSpan={14} className="muted">{t("coverage.empty")}</td></tr>
+              ) : (
+                coverage.map((row) => (
+                  <tr key={row.year}>
+                    <td className="nowrap"><b>{row.year}</b></td>
+                    {row.months.map((cell, i) => (
+                      <td key={i} className={`cov-cell ${cell.count === 0 ? "cov-zero" : cell.count < USUAL ? "cov-low" : "cov-ok"}`}>
+                        {cell.count > 0 ? (
+                          <span className="cov-count" tabIndex={0}>
+                            {cell.count}
+                            <span className="cov-tip">
+                              {cell.statements.map((s, j) => (
+                                <span key={j}>{j + 1}. {s}</span>
+                              ))}
+                            </span>
+                          </span>
+                        ) : (
+                          <span className="cov-count cov-zero-mark">0</span>
+                        )}
+                      </td>
+                    ))}
+                    <td className="amount-cell"><b>{row.total}</b></td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+        <p className="stat-sub">{t("coverage.legend")}</p>
+      </section>
     </>
   );
 }

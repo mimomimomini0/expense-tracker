@@ -891,3 +891,37 @@ table.data.api-costs { min-width: 0; }
 .btn-secondary.danger { color: var(--danger); border-color: var(--danger); }
 .cat-row { border-bottom: none; padding: 0; flex: 1; }
 
+
+/* ---------- My calendar: enlarged calendar + coverage matrix ---------- */
+.calendar-card { flex: 3 1 560px; }
+.duelist-card { flex: 1 1 240px; }
+.calendar-grid.big .cal-cell { min-height: 108px; padding: 0.4rem 0.45rem; font-size: 0.82rem; }
+.calendar-grid.big .cal-day { font-size: 0.85rem; font-weight: 600; }
+.calendar-grid.big .cal-weekday { padding: 0.5rem 0.4rem; font-size: 0.78rem; }
+.calendar-grid.big .due-chip { font-size: 0.72rem; padding: 0.2rem 0.4rem; }
+.calendar-head h2 { font-size: 1.2rem; }
+
+.coverage-card { margin-top: 1rem; }
+table.data.coverage { min-width: 0; width: 100%; }
+table.data.coverage th.cov-th { text-align: center; }
+.cov-cell { text-align: center; padding: 0.3rem 0.2rem; }
+.cov-count {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  min-width: 1.8rem; height: 1.6rem; border-radius: 6px; font-weight: 600;
+  cursor: default; outline: none;
+}
+.cov-ok .cov-count { background: var(--good-soft); color: var(--status-good-text); }
+.cov-low .cov-count { background: var(--warnl-soft); color: var(--status-warn-text); }
+.cov-zero-mark { background: var(--crit-soft); color: var(--status-crit); }
+.cov-tip {
+  display: none; position: absolute; bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%); z-index: 20; min-width: 200px; max-width: 320px;
+  background: var(--tooltip-bg); color: var(--tooltip-ink); text-align: left;
+  padding: 0.5rem 0.6rem; border-radius: 8px; font-size: 0.74rem; font-weight: 400;
+  box-shadow: 0 6px 18px var(--shadow); white-space: normal;
+}
+.cov-tip span { display: block; padding: 0.08rem 0; }
+.cov-count:hover .cov-tip, .cov-count:focus .cov-tip { display: block; }
+
+.dispute-stmt-head { display: flex; align-items: center; gap: 0.75rem; justify-content: space-between; flex-wrap: wrap; }
+.dispute-stmt-head .dispute-deadline { margin: 0.2rem 0; }

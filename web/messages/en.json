@@ -3,7 +3,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "transactions": "Transactions",
-    "duedates": "Payment due dates",
+    "duedates": "My calendar",
     "subscriptions": "Subscriptions",
     "costs": "Cost of credit",
     "queue": "Review queue",
@@ -108,7 +108,7 @@
     }
   },
   "duedates": {
-    "title": "Payment due dates",
+    "title": "My calendar",
     "listTitle": "Due dates by card",
     "listNote": "Each card's latest statement cycle. Recording payments happens on the dashboard.",
     "empty": "No due dates on record yet.",
@@ -117,6 +117,14 @@
       "upcoming": "Upcoming",
       "soon": "Due within 7 days",
       "overdue": "Overdue / due now"
+    },
+    "coverage": {
+      "title": "Statement uploads by month",
+      "note": "How many statements you uploaded each month. A 0 or a lower-than-usual number means a statement may be missing — hover a month to see which statements it holds.",
+      "year": "Year",
+      "total": "Total",
+      "empty": "No statements uploaded yet.",
+      "legend": "Green = 3 or more · amber = fewer than usual · red = none that month."
     }
   },
   "dashboard": {
@@ -229,7 +237,8 @@
       "duplicate": "duplicate amount"
     },
     "note": "Malaysian card statements become legally conclusive 14 days after the statement date. Flags are review nudges, not accusations — same-day duplicates at one merchant are often real.",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "dismissAll": "Dismiss all"
   },
   "payments": {
     "title": "Upcoming payments",

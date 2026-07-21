@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import type { DisputeAlert } from "@/lib/flags-data";
 import { formatRM } from "@/lib/format";
-import { dismissDisputeFlag } from "./actions";
+import { dismissDisputeFlag, dismissAllDisputeFlags } from "./actions";
 
 /** FR-18: "Dispute window closes [date] — review flagged items now."
  *  Rendered only while at least one statement's 14-day window is open. */
@@ -14,10 +14,20 @@ export default async function DisputePanel({ alerts }: { alerts: DisputeAlert[] 
       <h2>{t("title")}</h2>
       {alerts.map((a) => (
         <div key={a.statementId} className="dispute-stmt">
-          <p className={`dispute-deadline ${a.daysLeft <= 2 ? "critical" : "warning"}`}>
-            <i aria-hidden="true">{a.daysLeft <= 2 ? "!" : "▲"}</i>{" "}
-            {t("deadline", { statement: a.statementDate, deadline: a.deadline, days: a.daysLeft })}
-          </p>
+          <div className="dispute-stmt-head">
+            <p className={`dispute-deadline ${a.daysLeft <= 2 ? "critical" : "warning"}`}>
+              <i aria-hidden="true">{a.daysLeft <= 2 ? "!" : "▲"}</i>{" "}
+              {t("deadline", { statement: a.statementDate, deadline: a.deadline, days: a.daysLeft })}
+            </p>
+            {a.flagged.length > 0 && (
+              <form action={dismissAllDisputeFlags}>
+                <input type="hidden" name="txnIds" value={a.flagged.map((f) => f.id).join(",")} />
+                <button type="submit" className="btn-secondary dismiss-btn">
+                  {t("dismissAll")}
+                </button>
+              </form>
+            )}
+          </div>
           {a.flagged.length === 0 ? (
             <p className="muted">{t("nothingFlagged")}</p>
           ) : (
