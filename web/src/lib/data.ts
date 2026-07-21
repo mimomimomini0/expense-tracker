@@ -72,7 +72,8 @@ export type TxnFilters = {
   /** merchant key (normalized description, country tail stripped) — matched
    *  in memory since the key cannot be computed in SQL (owner request) */
   merchant?: string;
-  txnType?: string;
+  /** multiple transaction types may be selected together (owner request) */
+  txnTypes?: string[];
   from?: string;
   to?: string;
   /** view order (owner request 2026-07-21); default newest first */
@@ -148,7 +149,7 @@ export async function getTransactions(
   if (filters.categories?.length) {
     query = query.in("category_id", filters.categories.map(Number));
   }
-  if (filters.txnType) query = query.eq("txn_type", filters.txnType);
+  if (filters.txnTypes?.length) query = query.in("txn_type", filters.txnTypes);
   if (filters.from) query = query.gte("txn_date", filters.from);
   if (filters.to) query = query.lte("txn_date", filters.to);
   const safePage = Math.max(1, page);
@@ -174,7 +175,7 @@ export async function getAllTransactions(filters: TxnFilters): Promise<TxnRow[]>
     let q = supabase.from("transactions").select(TXN_SELECT);
     if (filters.card) q = q.eq("card_account_id", Number(filters.card));
     if (filters.categories?.length) q = q.in("category_id", filters.categories.map(Number));
-    if (filters.txnType) q = q.eq("txn_type", filters.txnType);
+    if (filters.txnTypes?.length) q = q.in("txn_type", filters.txnTypes);
     if (filters.from) q = q.gte("txn_date", filters.from);
     if (filters.to) q = q.lte("txn_date", filters.to);
     const { data, error } = await applySort(q, filters.sort).range(from, from + 999);
@@ -257,7 +258,7 @@ export async function getTransactionStats(filters: TxnFilters): Promise<TxnStats
       .select(filters.merchant ? "amount_rm,direction,description_raw" : "amount_rm,direction");
     if (filters.card) q = q.eq("card_account_id", Number(filters.card));
     if (filters.categories?.length) q = q.in("category_id", filters.categories.map(Number));
-    if (filters.txnType) q = q.eq("txn_type", filters.txnType);
+    if (filters.txnTypes?.length) q = q.in("txn_type", filters.txnTypes);
     if (filters.from) q = q.gte("txn_date", filters.from);
     if (filters.to) q = q.lte("txn_date", filters.to);
     const { data, error } = await q.order("id").range(from, from + 999);

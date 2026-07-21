@@ -317,6 +317,8 @@
       "merchantPlaceholder": "输入搜索…",
       "removeMerchant": "移除商户筛选",
       "type": "类型",
+      "typesSelected": "{count, plural, other {已选 # 种类型}}",
+      "removeType": "移除 {name}",
       "from": "开始日期",
       "to": "结束日期",
       "sort": "排序",

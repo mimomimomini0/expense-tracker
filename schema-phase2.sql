@@ -35,6 +35,8 @@ insert into categories (name_en, name_zh, sort_order) values
   ('Lifestyle & Leisure',  '休闲娱乐',   143),
   ('Parking',              '停车费',     144),
   ('Travel Expenses',      '旅行开支',   145),
+  ('Gift & Donation',      '礼物与捐赠', 146),
+  ('Dispute',              '争议',       147),
   ('Paying on Behalf',     '代付',       150),
   ('Bank Fees & Interest', '银行费用与利息', 160),
   ('Refunds',              '退款',       170),

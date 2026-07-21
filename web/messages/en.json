@@ -317,6 +317,8 @@
       "merchantPlaceholder": "Type to search…",
       "removeMerchant": "Remove merchant filter",
       "type": "Type",
+      "typesSelected": "{count, plural, one {# type} other {# types}}",
+      "removeType": "Remove {name}",
       "from": "From",
       "to": "To",
       "sort": "View",

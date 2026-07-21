@@ -53,7 +53,7 @@ export default async function TransactionsPage({
     card: first(sp.card),
     categories: many(sp.category),
     merchant: first(sp.merchant),
-    txnType: first(sp.txn_type),
+    txnTypes: many(sp.txn_type),
     from: first(sp.from),
     to: first(sp.to),
     sort
@@ -174,14 +174,27 @@ export default async function TransactionsPage({
         </label>
         <label>
           {t("filters.type")}
-          <select name="txn_type" defaultValue={filters.txnType ?? ""}>
-            <option value="">{tc("all")}</option>
-            {TXN_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {tt(type)}
-              </option>
-            ))}
-          </select>
+          {/* checkbox multi-select (owner request 2026-07-21): tick any types */}
+          <details className="multiselect">
+            <summary>
+              {filters.txnTypes.length === 0
+                ? tc("all")
+                : t("filters.typesSelected", { count: filters.txnTypes.length })}
+            </summary>
+            <div className="multiselect-options">
+              {TXN_TYPES.map((type) => (
+                <label key={type} className="multiselect-option">
+                  <span>{tt(type)}</span>
+                  <input
+                    type="checkbox"
+                    name="txn_type"
+                    value={type}
+                    defaultChecked={filters.txnTypes.includes(type)}
+                  />
+                </label>
+              ))}
+            </div>
+          </details>
         </label>
         <label>
           {t("filters.from")}
@@ -206,8 +219,20 @@ export default async function TransactionsPage({
         </a>
       </form>
 
-      {(filters.categories.length > 0 || filters.merchant) && (
+      {(filters.categories.length > 0 || filters.merchant || filters.txnTypes.length > 0) && (
         <div className="filter-chips">
+          {filters.txnTypes.map((ty) => (
+            <span key={ty} className="filter-chip type-chip">
+              {tt(ty)}
+              <a
+                href={buildQuery({ ...filters, txnTypes: filters.txnTypes.filter((x) => x !== ty) }, 1)}
+                aria-label={t("filters.removeType", { name: tt(ty) })}
+                className="chip-x"
+              >
+                ×
+              </a>
+            </span>
+          ))}
           {filters.merchant && (
             <span className="filter-chip merchant-chip">
               {filters.merchant}
@@ -369,7 +394,7 @@ export default async function TransactionsPage({
 }
 
 type PageFilters = {
-  card?: string; categories: string[]; merchant?: string; txnType?: string;
+  card?: string; categories: string[]; merchant?: string; txnTypes: string[];
   from?: string; to?: string; sort?: string;
 };
 
@@ -378,7 +403,7 @@ function buildQuery(filters: PageFilters, page: number): string {
   if (filters.card) params.set("card", filters.card);
   for (const c of filters.categories) params.append("category", c);
   if (filters.merchant) params.set("merchant", filters.merchant);
-  if (filters.txnType) params.set("txn_type", filters.txnType);
+  for (const ty of filters.txnTypes) params.append("txn_type", ty);
   if (filters.from) params.set("from", filters.from);
   if (filters.to) params.set("to", filters.to);
   if (filters.sort && filters.sort !== "date_desc") params.set("sort", filters.sort);

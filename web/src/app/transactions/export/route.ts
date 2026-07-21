@@ -22,7 +22,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     card: sp.get("card") ?? undefined,
     categories: many(sp, "category"),
     merchant: sp.get("merchant") ?? undefined,
-    txnType: sp.get("txn_type") ?? undefined,
+    txnTypes: many(sp, "txn_type"),
     from: sp.get("from") ?? undefined,
     to: sp.get("to") ?? undefined,
     sort: (SORTS.includes(sp.get("sort") ?? "") ? sp.get("sort") : "date_desc") as
