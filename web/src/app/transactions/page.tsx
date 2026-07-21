@@ -7,6 +7,7 @@ import {
   getMerchantList,
   getTransactions,
   getTransactionStats,
+  sortCategoryOptions,
   type TxnRow,
   type TxnStats
 } from "@/lib/data";
@@ -107,7 +108,9 @@ export default async function TransactionsPage({
 
   const catName = (c: { name_en: string; name_zh: string | null }) =>
     locale === "zh" && c.name_zh ? c.name_zh : c.name_en;
-  const categoryOptions = categories.map((c) => ({ id: c.id, name: catName(c) }));
+  const categoryOptions = sortCategoryOptions(
+    categories.map((c) => ({ id: c.id, name: catName(c) })), locale,
+  );
   const tagOptions = buildTagOptions(companies, tc("personal"));
 
   return (

@@ -1,5 +1,5 @@
 ﻿import { getLocale, getTranslations } from "next-intl/server";
-import { getCategories, getQueueTransactions, type TxnRow } from "@/lib/data";
+import { getCategories, getQueueTransactions, sortCategoryOptions, type TxnRow } from "@/lib/data";
 import { formatDate, formatRM } from "@/lib/format";
 import { merchantKey } from "@/lib/merchant-key";
 import GroupConfirm from "../queue/GroupConfirm";
@@ -32,10 +32,13 @@ export default async function QueueSection() {
     );
   }
 
-  const categoryOptions = categories.map((c) => ({
-    id: c.id,
-    name: locale === "zh" && c.name_zh ? c.name_zh : c.name_en
-  }));
+  const categoryOptions = sortCategoryOptions(
+    categories.map((c) => ({
+      id: c.id,
+      name: locale === "zh" && c.name_zh ? c.name_zh : c.name_en
+    })),
+    locale,
+  );
 
   // Group by merchant key (uppercase, whitespace collapsed, trailing 2-letter
   // country token stripped).

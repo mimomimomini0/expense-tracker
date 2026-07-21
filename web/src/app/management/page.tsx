@@ -71,7 +71,7 @@ export default async function ManagementPage({ searchParams }: { searchParams: S
 async function buildBoard(locale: string): Promise<BoardColumn[]> {
   const supabase = getSupabase();
   const [catsQ, rulesQ] = await Promise.all([
-    supabase.from("categories").select("id,name_en,name_zh,sort_order").is("user_id", null).order("sort_order"),
+    supabase.from("categories").select("id,name_en,name_zh,sort_order").is("user_id", null).order("name_en"),
     supabase.from("merchant_rules").select("merchant_pattern,category_id,confirmed_at"),
   ]);
   if (catsQ.error) throw new Error(catsQ.error.message);

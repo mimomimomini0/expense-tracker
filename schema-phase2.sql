@@ -33,6 +33,7 @@ insert into categories (name_en, name_zh, sort_order) values
   ('Fitness & Sports',     '健身与运动', 140),
   -- owner requests 2026-07-21
   ('Lifestyle & Leisure',  '休闲娱乐',   143),
+  ('Parking',              '停车费',     144),
   ('Travel Expenses',      '旅行开支',   145),
   ('Paying on Behalf',     '代付',       150),
   ('Bank Fees & Interest', '银行费用与利息', 160),

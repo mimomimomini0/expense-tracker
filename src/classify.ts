@@ -26,6 +26,7 @@ export const CATEGORIES = [
   "Fitness & Sports",
   // owner requests 2026-07-21
   "Lifestyle & Leisure",
+  "Parking",
   "Travel Expenses",
   "Paying on Behalf", "Bank Fees & Interest", "Refunds",
   // owner decision Q1 (2026-07-20): e-wallet top-ups are transfers, excluded

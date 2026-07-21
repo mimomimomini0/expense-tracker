@@ -9,7 +9,7 @@ export default async function CategorySection({ error }: { error: string | null 
   const supabase = getSupabase();
 
   const catsQ = await supabase.from("categories")
-    .select("id,name_en,name_zh,sort_order").is("user_id", null).order("sort_order");
+    .select("id,name_en,name_zh,sort_order").is("user_id", null).order("name_en");
   if (catsQ.error) return <p className="error-box">{catsQ.error.message}</p>;
 
   // usage counts so the UI can say which are deletable

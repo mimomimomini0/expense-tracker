@@ -215,7 +215,7 @@ export async function getMerchantList(): Promise<{ key: string; count: number }[
   }
   return [...counts.entries()]
     .map(([key, count]) => ({ key, count }))
-    .sort((a, b) => b.count - a.count || a.key.localeCompare(b.key));
+    .sort((a, b) => a.key.localeCompare(b.key)); // A→Z (owner request 2026-07-21)
 }
 
 /** Raw (pre-alias) merchant keys with counts — feeds the merge UI. */
@@ -308,10 +308,15 @@ export async function getCategories(): Promise<Category[]> {
   const { data, error } = await supabase
     .from("categories")
     .select("id, name_en, name_zh, sort_order")
-    .order("sort_order", { ascending: true })
-    .order("id", { ascending: true });
+    .order("name_en", { ascending: true }); // A→Z (owner request 2026-07-21)
   if (error) throw new Error(error.message);
   return (data ?? []) as Category[];
+}
+
+/** Sort category display options A→Z in the CURRENT locale (English rows are
+ *  already A→Z from the query; this also alphabetises the zh names). */
+export function sortCategoryOptions<T extends { name: string }>(opts: T[], locale: string): T[] {
+  return [...opts].sort((a, b) => a.name.localeCompare(b.name, locale === "zh" ? "zh" : "en"));
 }
 
 export async function getCards(): Promise<CardAccount[]> {
@@ -321,13 +326,20 @@ export async function getCards(): Promise<CardAccount[]> {
     .select("id, last4, display_name, default_business_tag, banks ( name )")
     .order("id", { ascending: true });
   if (error) throw new Error(error.message);
-  return (data ?? []).map((row: any) => ({
-    id: row.id,
-    last4: row.last4,
-    display_name: row.display_name ?? null,
-    default_business_tag: row.default_business_tag ?? "personal",
-    bank_name: row.banks?.name ?? "?"
-  }));
+  return (data ?? [])
+    .map((row: any) => ({
+      id: row.id,
+      last4: row.last4,
+      display_name: row.display_name ?? null,
+      default_business_tag: row.default_business_tag ?? "personal",
+      bank_name: row.banks?.name ?? "?"
+    }))
+    // A→Z by the label the user sees (owner request 2026-07-21)
+    .sort((a, b) =>
+      (a.display_name ?? `${a.bank_name} ${a.last4}`).localeCompare(
+        b.display_name ?? `${b.bank_name} ${b.last4}`, "en",
+      ),
+    );
 }
 
 /** companies MAY NOT EXIST yet (Phase 2b addendum). Degrades gracefully. */
