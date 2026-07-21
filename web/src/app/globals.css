@@ -859,3 +859,14 @@ table.data.mini { font-size: 0.8rem; margin-top: 0.5rem; }
 .dispute-list li:last-child { border-bottom: none; }
 .dispute-list .desc-raw { flex: 1; min-width: 200px; }
 .dispute-list .chips { margin-top: 0; }
+
+/* ---------- Phase 4: login ---------- */
+.login-wrap { display: flex; justify-content: center; padding: 3rem 1rem; }
+.login-card {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+  padding: 1.5rem; width: 100%; max-width: 360px;
+}
+.login-form { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 0.5rem; }
+.otp-input { font-size: 1.4rem; letter-spacing: 0.4em; text-align: center; }
+.logout-btn { font-size: 0.8rem; }
+table.data.api-costs { min-width: 0; }

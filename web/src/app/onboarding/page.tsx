@@ -16,6 +16,7 @@ import {
   saveProfile,
   setCompanyArchived
 } from "./actions";
+import SystemSection from "./SystemSection";
 
 export const dynamic = "force-dynamic";
 
@@ -206,6 +207,8 @@ export default async function OnboardingPage() {
           </form>
         ))}
       </section>
+
+      <SystemSection />
     </>
   );
 }

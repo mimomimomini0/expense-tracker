@@ -56,3 +56,11 @@ npm run dev     # http://localhost:3000
 npm run build
 npm start
 ```
+
+## Auth (Phase 4)
+
+Passwordless email-OTP login, DISABLED by default. To enable: set
+`AUTH_ENABLED=1` in the parent `.env` and restart. Only `ALLOWED_EMAIL` may
+sign in; the 6-digit code arrives via Supabase Auth's built-in mailer.
+Locked out? Set `AUTH_ENABLED=0` again. Sessions last 30 days
+(HMAC-signed httpOnly cookie).

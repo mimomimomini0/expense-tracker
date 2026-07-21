@@ -7,7 +7,35 @@
     "subscriptions": "Subscriptions",
     "queue": "Review queue",
     "management": "Management",
-    "onboarding": "Settings"
+    "onboarding": "Settings",
+    "logout": "Log out"
+  },
+  "login": {
+    "title": "Sign in",
+    "email": "Email",
+    "sendCode": "Send code",
+    "codeSent": "A 6-digit code was sent to {email}.",
+    "code": "Code",
+    "verify": "Verify & sign in",
+    "startOver": "Use a different email",
+    "errors": {
+      "email": "This email is not authorised for this system.",
+      "send": "Could not send the code — try again in a minute.",
+      "code": "That code didn't match. Check it and try again."
+    }
+  },
+  "system": {
+    "apiCosts": {
+      "title": "API costs",
+      "total": "{calls} calls · USD {usd} (≈ {rm})",
+      "purpose": "Purpose",
+      "calls": "Calls"
+    },
+    "backup": {
+      "title": "Backup",
+      "note": "Downloads every table as one JSON file. Statement PDFs stay in storage and Dropbox.",
+      "download": "Download full backup (JSON)"
+    }
   },
   "subscriptions": {
     "title": "Subscriptions & recurring",

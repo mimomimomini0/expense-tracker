@@ -5,15 +5,24 @@ import { NextIntlClientProvider } from "next-intl";
 import { cookies } from "next/headers";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { getBannerPayment } from "@/lib/payments-data";
+import { authEnabled } from "@/lib/auth";
 import { formatRM } from "@/lib/format";
+import { logout } from "./login/actions";
 import LocaleToggle from "./components/LocaleToggle";
+import PwaRegister from "./components/PwaRegister";
 import ThemeToggle from "./components/ThemeToggle";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
 
+export const viewport = {
+  themeColor: "#0f6b4f"
+};
+
 export const metadata: Metadata = {
-  title: "Expense Tracker"
+  title: "Expense Tracker",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, title: "Expenses", statusBarStyle: "default" }
 };
 
 export default async function RootLayout({
@@ -46,7 +55,15 @@ export default async function RootLayout({
             </nav>
             <ThemeToggle current={theme ?? "system"} />
             <LocaleToggle current={locale} />
+            {authEnabled() && (
+              <form action={logout}>
+                <button type="submit" className="btn-secondary logout-btn">
+                  {tNav("logout")}
+                </button>
+              </form>
+            )}
           </header>
+          <PwaRegister />
           {banner && (
             <Link href="/dashboard" className={`due-banner ${banner.daysRemaining <= 2 ? "critical" : "warning"}`}>
               <i aria-hidden="true">{banner.daysRemaining <= 2 ? "!" : "▲"}</i>{" "}

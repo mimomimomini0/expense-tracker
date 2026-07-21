@@ -7,7 +7,35 @@
     "subscriptions": "订阅",
     "queue": "确认队列",
     "management": "管理",
-    "onboarding": "设置"
+    "onboarding": "设置",
+    "logout": "退出登录"
+  },
+  "login": {
+    "title": "登录",
+    "email": "邮箱",
+    "sendCode": "发送验证码",
+    "codeSent": "6 位验证码已发送至 {email}。",
+    "code": "验证码",
+    "verify": "验证并登录",
+    "startOver": "使用其他邮箱",
+    "errors": {
+      "email": "此邮箱未被授权使用本系统。",
+      "send": "验证码发送失败——请稍后重试。",
+      "code": "验证码不正确，请检查后重试。"
+    }
+  },
+  "system": {
+    "apiCosts": {
+      "title": "API 费用",
+      "total": "{calls} 次调用 · USD {usd}（约 {rm}）",
+      "purpose": "用途",
+      "calls": "次数"
+    },
+    "backup": {
+      "title": "备份",
+      "note": "将所有数据表下载为一个 JSON 文件。账单 PDF 保留在存储和 Dropbox 中。",
+      "download": "下载完整备份（JSON）"
+    }
   },
   "subscriptions": {
     "title": "订阅与周期性支出",
