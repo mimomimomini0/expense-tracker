@@ -195,17 +195,22 @@ export async function getAllTransactions(filters: TxnFilters): Promise<TxnRow[]>
   return rows;
 }
 
-/** Distinct merchant keys with row counts, most frequent first — feeds the
- *  merchant picker. Near-duplicate registrations (same shop, slightly
- *  different terminal name) appear as separate keys by design; aligning them
- *  is the Management tab's job. */
-export async function getMerchantList(): Promise<{ key: string; count: number }[]> {
+/** Distinct merchant keys with row counts (alias-collapsed) — feeds the
+ *  merchant picker. Scoped to the CURRENT filters EXCEPT the merchant filter
+ *  itself, so e.g. a May-only date range only lists May's merchants (owner
+ *  request 2026-07-21). */
+export async function getMerchantList(filters?: TxnFilters): Promise<{ key: string; count: number }[]> {
   const supabase = getSupabase();
   const aliases = await getAliasMap();
   const counts = new Map<string, number>();
   for (let from = 0; ; from += 1000) {
-    const { data, error } = await supabase
-      .from("transactions").select("description_raw").order("id").range(from, from + 999);
+    let q = supabase.from("transactions").select("description_raw");
+    if (filters?.card) q = q.eq("card_account_id", Number(filters.card));
+    if (filters?.categories?.length) q = q.in("category_id", filters.categories.map(Number));
+    if (filters?.txnTypes?.length) q = q.in("txn_type", filters.txnTypes);
+    if (filters?.from) q = q.gte("txn_date", filters.from);
+    if (filters?.to) q = q.lte("txn_date", filters.to);
+    const { data, error } = await q.order("id").range(from, from + 999);
     if (error) throw new Error(error.message);
     for (const r of (data ?? []) as { description_raw: string }[]) {
       // merged variants collapse under their canonical name

@@ -313,6 +313,8 @@
       "categoriesSelected": "{count, plural, other {已选 # 个分类}}",
       "removeCategory": "移除 {name}",
       "clearCategories": "全部清除",
+      "selectAll": "全选",
+      "deselectAll": "清除",
       "merchant": "商户",
       "merchantPlaceholder": "输入搜索…",
       "removeMerchant": "移除商户筛选",

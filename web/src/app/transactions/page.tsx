@@ -82,7 +82,8 @@ export default async function TransactionsPage({
       getCategories(),
       getCards(),
       getCompanies(),
-      getMerchantList()
+      // merchant picker scoped to the current filters (owner request 2026-07-21)
+      getMerchantList(filters)
     ]);
     txns = txnsR.rows;
     total = txnsR.total;
@@ -141,6 +142,10 @@ export default async function TransactionsPage({
                 : t("filters.categoriesSelected", { count: filters.categories.length })}
             </summary>
             <div className="multiselect-options">
+              <div className="ms-controls">
+                <button type="button" data-ms-all>{t("filters.selectAll")}</button>
+                <button type="button" data-ms-none>{t("filters.deselectAll")}</button>
+              </div>
               {categoryOptions.map((c) => (
                 // owner request: name on the left, tick box on the RIGHT
                 <label key={c.id} className="multiselect-option">
@@ -182,6 +187,10 @@ export default async function TransactionsPage({
                 : t("filters.typesSelected", { count: filters.txnTypes.length })}
             </summary>
             <div className="multiselect-options">
+              <div className="ms-controls">
+                <button type="button" data-ms-all>{t("filters.selectAll")}</button>
+                <button type="button" data-ms-none>{t("filters.deselectAll")}</button>
+              </div>
               {TXN_TYPES.map((type) => (
                 <label key={type} className="multiselect-option">
                   <span>{tt(type)}</span>

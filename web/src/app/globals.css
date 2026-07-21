@@ -925,3 +925,15 @@ table.data.coverage th.cov-th { text-align: center; }
 
 .dispute-stmt-head { display: flex; align-items: center; gap: 0.75rem; justify-content: space-between; flex-wrap: wrap; }
 .dispute-stmt-head .dispute-deadline { margin: 0.2rem 0; }
+
+/* multi-select select-all / clear controls */
+.ms-controls {
+  display: flex; gap: 0.4rem; padding: 0.1rem 0.2rem 0.4rem;
+  border-bottom: 1px solid var(--border); margin-bottom: 0.3rem;
+}
+.ms-controls button {
+  flex: 1; font-size: 0.72rem; padding: 0.2rem 0.4rem; cursor: pointer;
+  background: var(--surface-2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 5px;
+}
+.ms-controls button:hover { background: var(--neutral-soft); }

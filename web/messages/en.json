@@ -313,6 +313,8 @@
       "categoriesSelected": "{count, plural, one {# category} other {# categories}}",
       "removeCategory": "Remove {name}",
       "clearCategories": "Clear all",
+      "selectAll": "Select all",
+      "deselectAll": "Clear",
       "merchant": "Merchant",
       "merchantPlaceholder": "Type to search…",
       "removeMerchant": "Remove merchant filter",
