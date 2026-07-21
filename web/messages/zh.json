@@ -5,6 +5,7 @@
     "transactions": "交易记录",
     "duedates": "还款日期",
     "subscriptions": "订阅",
+    "costs": "用卡成本",
     "queue": "确认队列",
     "management": "管理",
     "onboarding": "设置",
@@ -164,6 +165,31 @@
     "notes": {
       "transfers": "钱包转账不计入消费总额（业主决定 Q1）。",
       "refunds": "退款作为独立系列，绝不并入分类总额。"
+    }
+  },
+  "costs": {
+    "title": "你的信用卡花了你多少钱",
+    "worsenedAlert": "最新账单的利率档次上升：{cards}。逾期还款将使每一令吉的余额成本更高。",
+    "tiles": {
+      "allTime": "费用与利息（累计）",
+      "rows": "{count, plural, other {# 笔}}",
+      "thisYear": "费用与利息（{year} 年）"
+    },
+    "byCard": {
+      "title": "按卡片与年份",
+      "card": "卡片",
+      "total": "合计",
+      "note": "滞纳金、财务费用、服务税与年费——这些钱没有换来任何东西。"
+    },
+    "tiers": {
+      "title": "利率档次历史",
+      "note": "每期账单打印的零售利率（15% / 17% / 18% 行为档次）。上升意味着逾期还款使卡片进入了更贵的档次。",
+      "current": "当前利率",
+      "range": "历史区间",
+      "points": "账单数",
+      "status": "状态",
+      "steady": "稳定",
+      "worsened": "已上升"
     }
   },
   "dispute": {

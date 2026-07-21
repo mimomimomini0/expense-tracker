@@ -5,6 +5,7 @@
     "transactions": "Transactions",
     "duedates": "Payment due dates",
     "subscriptions": "Subscriptions",
+    "costs": "Cost of credit",
     "queue": "Review queue",
     "management": "Management",
     "onboarding": "Settings",
@@ -164,6 +165,31 @@
     "notes": {
       "transfers": "Wallet transfers are excluded from spending totals (owner decision Q1).",
       "refunds": "Refunds are their own series and are never netted into category totals."
+    }
+  },
+  "costs": {
+    "title": "What your cards cost you",
+    "worsenedAlert": "Interest tier WORSENED on the latest statement: {cards}. Late payments now cost more on every ringgit of balance.",
+    "tiles": {
+      "allTime": "Fees & interest, all time",
+      "rows": "{count, plural, one {# charge} other {# charges}}",
+      "thisYear": "Fees & interest, {year}"
+    },
+    "byCard": {
+      "title": "By card and year",
+      "card": "Card",
+      "total": "Total",
+      "note": "Late charges, finance charges, service tax and annual fees — money that bought nothing."
+    },
+    "tiers": {
+      "title": "Interest-tier history",
+      "note": "The retail interest rate printed on each statement (15% / 17% / 18% behavioral tiers). A rise means late payments moved the card to a costlier tier.",
+      "current": "Current rate",
+      "range": "Range seen",
+      "points": "Statements",
+      "status": "Status",
+      "steady": "Steady",
+      "worsened": "Worsened"
     }
   },
   "dispute": {
