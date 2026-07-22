@@ -3,8 +3,10 @@ import {
   getDueDatesInRange, getUpcomingPayments, klToday,
   type DueDateEntry, type UpcomingPayment,
 } from "@/lib/payments-data";
-import { getStatementCoverage, type CoverageYear } from "@/lib/coverage-data";
+import { getStatementCoverage, getBankCoverage, type CoverageYear, type BankCoverage } from "@/lib/coverage-data";
 import { formatRM } from "@/lib/format";
+import { dismissCoverageFlag } from "./coverage-actions";
+import DetailsAutoClose from "../components/DetailsAutoClose";
 
 export const dynamic = "force-dynamic";
 
@@ -36,12 +38,14 @@ export default async function DueDatesPage({ searchParams }: { searchParams: Sea
   let entries: DueDateEntry[] = [];
   let list: UpcomingPayment[] = [];
   let coverage: CoverageYear[] = [];
+  let bankCoverage: BankCoverage[] = [];
   let loadError: string | null = null;
   try {
-    [entries, list, coverage] = await Promise.all([
+    [entries, list, coverage, bankCoverage] = await Promise.all([
       getDueDatesInRange(firstIso, lastIso),
       getUpcomingPayments(),
       getStatementCoverage(),
+      getBankCoverage(today),
     ]);
   } catch (e) {
     loadError = e instanceof Error ? e.message : String(e);
@@ -156,6 +160,63 @@ export default async function DueDatesPage({ searchParams }: { searchParams: Sea
           <p className="stat-sub">{t("listNote")}</p>
         </section>
       </div>
+
+      <DetailsAutoClose />
+      <section className="viz-card">
+        <h2>{t("bankCoverage.title")}</h2>
+        <p className="inline-note">{t("bankCoverage.note")}</p>
+        {bankCoverage.length === 0 ? (
+          <p className="muted">{t("bankCoverage.empty")}</p>
+        ) : (
+          <div className="bankcov-list">
+            {bankCoverage.map((bc) => (
+              <div className="bankcov-row" key={bc.bankId}>
+                <div className="bankcov-head">
+                  <strong>{bc.bankName}</strong>
+                  <span className="muted"> {bc.cards.map((c) => `••${c}`).join(" ")}</span>
+                  {bc.behind && <span className="badge badge-crit">{t("bankCoverage.behind")}</span>}
+                  <span className="muted bankcov-latest">
+                    {t("bankCoverage.summary", { n: bc.monthsCovered, date: bc.latestDate ?? "—" })}
+                  </span>
+                </div>
+                <div className="bankcov-strip">
+                  {[...new Set(bc.months.map((m) => m.ym.slice(0, 4)))].map((yr) => (
+                    <span className="covyear" key={yr}>
+                      <span className="covyear-label">{yr.slice(2)}</span>
+                      {bc.months.filter((m) => m.ym.startsWith(yr)).map((mo) => {
+                        const mm = mo.ym.slice(5);
+                        if (mo.present) return <span key={mo.ym} className="covcell present" title={`${mo.ym} ✓`}>{mm}</span>;
+                        if (mo.dismissed) return <span key={mo.ym} className="covcell dismissed" title={`${mo.ym} — ${t("bankCoverage.dismissedTip")}`}>{mm}</span>;
+                        return (
+                          <details key={mo.ym} className="covcell missing">
+                            <summary title={`${mo.ym} — ${t("bankCoverage.missingTip")}`}>{mm}</summary>
+                            <div className="covcell-menu">
+                              <div className="covcell-menu-title">{t("bankCoverage.missingMonth", { ym: mo.ym })}</div>
+                              <form action={dismissCoverageFlag}>
+                                <input type="hidden" name="bankId" value={bc.bankId} />
+                                <input type="hidden" name="scope" value={mo.ym} />
+                                <input type="hidden" name="forever" value="0" />
+                                <button type="submit">{t("bankCoverage.unflag")}</button>
+                              </form>
+                              <form action={dismissCoverageFlag}>
+                                <input type="hidden" name="bankId" value={bc.bankId} />
+                                <input type="hidden" name="scope" value={mo.ym} />
+                                <input type="hidden" name="forever" value="1" />
+                                <button type="submit">{t("bankCoverage.unflagForever")}</button>
+                              </form>
+                            </div>
+                          </details>
+                        );
+                      })}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <p className="stat-sub">{t("bankCoverage.legend")}</p>
+      </section>
 
       <section className="viz-card coverage-card">
         <h2>{t("coverage.title")}</h2>

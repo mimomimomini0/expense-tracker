@@ -978,6 +978,40 @@ table.data.coverage th.cov-th { text-align: center; }
 .donut-cards > .viz-card, .donut-cards > .donut-col { flex: 1 1 360px; min-width: 0; }
 .donut-col { display: flex; flex-direction: column; gap: 1rem; }
 
+/* per-bank statement coverage strip (My calendar) */
+.bankcov-list { display: flex; flex-direction: column; gap: 0.7rem; }
+.bankcov-row { border-bottom: 1px solid var(--border); padding-bottom: 0.55rem; }
+.bankcov-row:last-child { border-bottom: none; }
+.bankcov-head { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.35rem; }
+.bankcov-latest { margin-left: auto; font-size: 0.78rem; }
+.badge-crit {
+  font-size: 0.68rem; font-weight: 600; padding: 0.05rem 0.4rem; border-radius: 999px;
+  background: var(--status-crit); color: #fff;
+}
+.bankcov-strip { display: flex; flex-wrap: wrap; gap: 0.55rem; align-items: center; }
+.covyear { display: inline-flex; align-items: center; gap: 2px; }
+.covyear-label { font-size: 0.68rem; color: var(--muted); margin-right: 3px; }
+.covcell {
+  width: 1.7rem; height: 1.5rem; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 0.68rem; border-radius: 4px; font-variant-numeric: tabular-nums;
+}
+.covcell.present { background: var(--status-good); color: #fff; }
+.covcell.dismissed { background: var(--surface-2); color: var(--muted); text-decoration: line-through; }
+.covcell.missing { position: relative; padding: 0; }
+.covcell.missing > summary {
+  list-style: none; cursor: pointer; width: 1.7rem; height: 1.5rem;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--status-crit); color: #fff; border-radius: 4px;
+}
+.covcell.missing > summary::-webkit-details-marker { display: none; }
+.covcell-menu {
+  position: absolute; z-index: 30; top: calc(100% + 3px); left: 0;
+  background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+  padding: 0.4rem; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3); min-width: 150px; text-align: left;
+}
+.covcell-menu-title { font-size: 0.72rem; color: var(--muted); margin-bottom: 0.25rem; white-space: nowrap; }
+.covcell-menu button { width: 100%; text-align: left; margin-top: 0.25rem; }
+
 /* card management grouped by bank */
 .card-bank-group { margin-bottom: 0.75rem; }
 .card-bank-name {

@@ -66,3 +66,89 @@ export async function getStatementCoverage(): Promise<CoverageYear[]> {
     }))
     .sort((a, b) => b.year - a.year);
 }
+
+// ---------- per-bank coverage (owner request 2026-07-22) ----------
+// One statement from a bank usually covers all its cards, so coverage is
+// tracked per BANK per month. Missing months are flagged; a flag can be
+// dismissed ("unflag" / "unflag forever") — persisted in edit_log
+// (field='coverage_dismiss', entity_id=bankId, new_value=YYYY-MM) so no new
+// table is needed.
+
+export interface BankMonth { ym: string; present: boolean; dismissed: boolean; }
+export interface BankCoverage {
+  bankId: number;
+  bankName: string;
+  cards: string[]; // last4 list
+  monthsCovered: number;
+  latestDate: string | null;
+  months: BankMonth[]; // earliest present month .. current month
+  missingActive: number; // non-dismissed missing months
+  behind: boolean; // a recent month (this/last) is missing and not dismissed
+}
+
+const nextYm = (ym: string): string => {
+  let [y, m] = ym.split("-").map(Number) as [number, number];
+  m += 1; if (m > 12) { m = 1; y += 1; }
+  return `${y}-${String(m).padStart(2, "0")}`;
+};
+const prevYm = (ym: string): string => {
+  let [y, m] = ym.split("-").map(Number) as [number, number];
+  m -= 1; if (m < 1) { m = 12; y -= 1; }
+  return `${y}-${String(m).padStart(2, "0")}`;
+};
+
+export async function getBankCoverage(todayIso?: string): Promise<BankCoverage[]> {
+  const supabase = getSupabase();
+  const todayYm = (todayIso ?? new Date().toISOString().slice(0, 10)).slice(0, 7);
+
+  const banksQ = await supabase.from("banks").select("id,name");
+  if (banksQ.error) throw new Error(banksQ.error.message);
+  const cardsQ = await supabase.from("card_accounts").select("last4,bank_id");
+  if (cardsQ.error) throw new Error(cardsQ.error.message);
+  const stmtQ = await supabase.from("statements").select("bank_id,statement_date");
+  if (stmtQ.error) throw new Error(stmtQ.error.message);
+  const dq = await supabase.from("edit_log").select("entity_id,new_value").eq("field", "coverage_dismiss");
+  if (dq.error) throw new Error(dq.error.message);
+
+  const dismissed = new Set<string>();
+  for (const d of (dq.data ?? []) as { entity_id: number; new_value: string }[]) {
+    dismissed.add(`${d.entity_id}:${d.new_value}`);
+  }
+  const monthsByBank = new Map<number, Set<string>>();
+  const latestByBank = new Map<number, string>();
+  for (const s of (stmtQ.data ?? []) as { bank_id: number; statement_date: string }[]) {
+    const ym = s.statement_date.slice(0, 7);
+    if (!monthsByBank.has(s.bank_id)) monthsByBank.set(s.bank_id, new Set());
+    monthsByBank.get(s.bank_id)!.add(ym);
+    const cur = latestByBank.get(s.bank_id);
+    if (!cur || s.statement_date > cur) latestByBank.set(s.bank_id, s.statement_date);
+  }
+  const cardsByBank = new Map<number, string[]>();
+  for (const c of (cardsQ.data ?? []) as { last4: string; bank_id: number }[]) {
+    if (!cardsByBank.has(c.bank_id)) cardsByBank.set(c.bank_id, []);
+    cardsByBank.get(c.bank_id)!.push(c.last4);
+  }
+
+  const recent = new Set([todayYm, prevYm(todayYm)]);
+  const out: BankCoverage[] = [];
+  for (const b of (banksQ.data ?? []) as { id: number; name: string }[]) {
+    const present = monthsByBank.get(b.id);
+    if (!present || present.size === 0) continue; // nothing uploaded — nothing to track
+    const earliest = [...present].sort()[0]!;
+    const months: BankMonth[] = [];
+    for (let ym = earliest; ym <= todayYm; ym = nextYm(ym)) {
+      const isPresent = present.has(ym);
+      months.push({ ym, present: isPresent, dismissed: !isPresent && dismissed.has(`${b.id}:${ym}`) });
+    }
+    const missingActive = months.filter((m) => !m.present && !m.dismissed).length;
+    const behind = months.some((m) => recent.has(m.ym) && !m.present && !m.dismissed);
+    out.push({
+      bankId: b.id, bankName: b.name,
+      cards: [...new Set(cardsByBank.get(b.id) ?? [])].sort(),
+      monthsCovered: present.size, latestDate: latestByBank.get(b.id) ?? null,
+      months, missingActive, behind,
+    });
+  }
+  out.sort((a, b) => Number(b.behind) - Number(a.behind) || a.bankName.localeCompare(b.bankName));
+  return out;
+}

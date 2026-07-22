@@ -138,6 +138,19 @@
       "total": "Total",
       "empty": "No statements uploaded yet.",
       "legend": "Green = 3 or more · amber = fewer than usual · red = none that month."
+    },
+    "bankCoverage": {
+      "title": "Statement coverage by bank",
+      "note": "One statement per bank usually covers all its cards. Green = uploaded, red = missing. Click a red month for options.",
+      "empty": "No statements uploaded yet.",
+      "behind": "behind",
+      "summary": "{n} months · latest {date}",
+      "missingTip": "missing — click for options",
+      "dismissedTip": "unflagged",
+      "missingMonth": "{ym} — no statement",
+      "unflag": "Unflag",
+      "unflagForever": "Unflag forever",
+      "legend": "Red = no statement uploaded. “Unflag forever” months you know will never arrive; “Unflag” just hides it for now."
     }
   },
   "dashboard": {
