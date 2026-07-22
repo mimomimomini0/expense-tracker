@@ -685,7 +685,11 @@ td.amount-cell {
 
 .table-details { margin-top: 0.8rem; }
 .table-details summary { font-size: 0.8rem; color: var(--ink-2); cursor: pointer; }
-table.data.mini { font-size: 0.8rem; margin-top: 0.5rem; }
+/* summary ("mini") tables size to their card at every width, so an expanded
+   list grows DOWNWARD inside the box instead of overflowing 960px and
+   overlapping a neighbouring card. (Big detail tables keep min-width:960 and
+   scroll inside their .table-wrap.) */
+table.data.mini { font-size: 0.8rem; margin-top: 0.5rem; min-width: 0; }
 
 /* ---------- FR-9 payments ---------- */
 .status-chip {
