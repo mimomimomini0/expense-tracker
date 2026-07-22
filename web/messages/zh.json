@@ -195,7 +195,12 @@
       "titleEmpty": "商户占比",
       "empty": "暂无可细分的开支。"
     },
-    "otherMerchants": "其他（{count} 个商户）"
+    "otherMerchants": "其他（{count} 个商户）",
+    "byCardChart": {
+      "title": "各卡开支"
+    },
+    "ewalletLabel": "电子钱包",
+    "otherCards": "其他（{count} 张卡）"
   },
   "export": {
     "transactionsSheet": "交易记录",

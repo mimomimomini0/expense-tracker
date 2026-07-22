@@ -42,7 +42,9 @@ const S_REFUNDS = SLOTS[2]!;
 function niceCeil(v: number): number {
   if (v <= 0) return 100;
   const pow = 10 ** Math.floor(Math.log10(v));
-  for (const m of [1, 2, 2.5, 5, 10]) {
+  // Fine steps so the axis hugs the data (e.g. 10,683 -> 12,000, not 20,000),
+  // which "zooms in" and makes small months readable.
+  for (const m of [1, 1.1, 1.2, 1.4, 1.5, 1.6, 1.8, 2, 2.5, 3, 4, 5, 6, 8, 10]) {
     if (m * pow >= v) return m * pow;
   }
   return 10 * pow;
@@ -252,6 +254,35 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
     const a0 = mAngle;
     const a1 = mAngle + frac * 2 * Math.PI;
     mAngle = a1;
+    const large = a1 - a0 > Math.PI ? 1 : 0;
+    const p = (r: number, ang: number) => `${(CX + r * Math.cos(ang)).toFixed(2)} ${(CY + r * Math.sin(ang)).toFixed(2)}`;
+    return {
+      ...a,
+      frac,
+      d: `M ${p(R, a0)} A ${R} ${R} 0 ${large} 1 ${p(R, a1)} L ${p(HOLE, a1)} A ${HOLE} ${HOLE} 0 ${large} 0 ${p(HOLE, a0)} Z`,
+    };
+  });
+
+  // ---------- third donut: spending by card (which card is used most) ----------
+  const cardSlices = [...data.byCard].filter((b) => b.spending > 0).sort((a, b) => b.spending - a.spending);
+  const cardChartTotal = cardSlices.reduce((s, b) => s + b.spending, 0);
+  const cTop = cardSlices.slice(0, TOP_N);
+  const cTail = cardSlices.slice(TOP_N);
+  const cTailTotal = cTail.reduce((s, b) => s + b.spending, 0);
+  const cardLbl = (b: { cardId: number | null; label: string }) => (b.cardId == null ? t("ewalletLabel") : b.label || `#${b.cardId}`);
+  const cArcs: Arc[] = cTop.map((b, i) => ({
+    label: cardLbl(b),
+    value: b.spending,
+    color: SLOTS[i]!,
+    href: b.cardId != null ? `/transactions?from=${filters.from}&to=${filters.to}&card=${b.cardId}` : null,
+  }));
+  if (cTailTotal > 0) cArcs.push({ label: t("otherCards", { count: cTail.length }), value: cTailTotal, color: SLOTS[7]!, href: null });
+  let cAngle = -Math.PI / 2;
+  const cPaths = cArcs.map((a) => {
+    const frac = cardChartTotal > 0 ? a.value / cardChartTotal : 0;
+    const a0 = cAngle;
+    const a1 = cAngle + frac * 2 * Math.PI;
+    cAngle = a1;
     const large = a1 - a0 > Math.PI ? 1 : 0;
     const p = (r: number, ang: number) => `${(CX + r * Math.cos(ang)).toFixed(2)} ${(CY + r * Math.sin(ang)).toFixed(2)}`;
     return {
@@ -525,6 +556,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
         </details>
       </section>
 
+      <div className="donut-col">
       <section className="viz-card">
         <h2>{tcm ? t("topMerchants.title", { category: mCatName }) : t("topMerchants.titleEmpty")}</h2>
         {tcm && mPaths.length > 0 ? (
@@ -562,6 +594,43 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
           <p className="muted">{t("topMerchants.empty")}</p>
         )}
       </section>
+
+      <section className="viz-card">
+        <h2>{t("byCardChart.title")}</h2>
+        {cPaths.length > 0 ? (
+          <div className="donut-row">
+            <svg viewBox="0 0 200 200" className="donut" role="img" aria-label={t("byCardChart.title")}>
+              {cPaths.map((p) => {
+                const shape = (
+                  <path d={p.d} fill={p.color} stroke="var(--surface, #fcfcfb)" strokeWidth="2">
+                    <title>{`${p.label}: ${formatRM(p.value)} (${(p.frac * 100).toFixed(1)}%)`}</title>
+                  </path>
+                );
+                return p.href ? <a key={p.label} href={p.href}>{shape}</a> : <g key={p.label}>{shape}</g>;
+              })}
+              <text x={CX} y={CY - 4} textAnchor="middle" className="donut-center-value">
+                {Math.round(cardChartTotal).toLocaleString()}
+              </text>
+              <text x={CX} y={CY + 14} textAnchor="middle" className="donut-center-label">
+                {t("categories.centerLabel")}
+              </text>
+            </svg>
+            <ul className="donut-legend">
+              {cPaths.map((p) => (
+                <li key={p.label}>
+                  <i className="key" style={{ background: p.color }} />
+                  {p.href ? <a href={p.href}>{p.label}</a> : <span>{p.label}</span>}
+                  <b>{formatRM(p.value)}</b>
+                  <span className="muted">{(p.frac * 100).toFixed(1)}%</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <p className="muted">{t("topMerchants.empty")}</p>
+        )}
+      </section>
+      </div>
       </div>
     </>
   );
