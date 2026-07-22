@@ -1,5 +1,7 @@
 {
-  "app": { "title": "消费记账" },
+  "app": {
+    "title": "消费记账"
+  },
   "nav": {
     "dashboard": "仪表板",
     "transactions": "交易记录",
@@ -14,16 +16,11 @@
   },
   "login": {
     "title": "登录",
-    "email": "邮箱",
-    "sendCode": "发送验证码",
-    "codeSent": "6 位验证码已发送至 {email}。",
-    "code": "验证码",
-    "verify": "验证并登录",
-    "startOver": "使用其他邮箱",
+    "password": "密码",
+    "signIn": "登录",
     "errors": {
-      "email": "此邮箱未被授权使用本系统。",
-      "send": "验证码发送失败——请稍后重试。",
-      "code": "验证码不正确，请检查后重试。"
+      "password": "密码不正确，请重试。",
+      "config": "登录尚未配置。请在 Vercel 设置 ALLOWED_PASSWORD 后重新部署。"
     }
   },
   "storage": {
@@ -220,7 +217,10 @@
     "period": "期间",
     "ewalletIncluded": "其中电子钱包消费",
     "ewalletRow": "TNG 电子钱包",
-    "columns": { "card": "卡片", "tag": "业务标签" },
+    "columns": {
+      "card": "卡片",
+      "tag": "业务标签"
+    },
     "notes": {
       "transfers": "钱包转账不计入消费总额（业主决定 Q1）。",
       "refunds": "退款作为独立系列，绝不并入分类总额。"
@@ -320,8 +320,17 @@
       "overdue": "{card}：{amount} 已逾期 {days, plural, other {# 天}}"
     }
   },
-  "locale": { "label": "语言", "en": "EN", "zh": "中文" },
-  "theme": { "label": "主题", "light": "日间模式", "dark": "夜间模式", "system": "跟随系统" },
+  "locale": {
+    "label": "语言",
+    "en": "EN",
+    "zh": "中文"
+  },
+  "theme": {
+    "label": "主题",
+    "light": "日间模式",
+    "dark": "夜间模式",
+    "system": "跟随系统"
+  },
   "common": {
     "save": "保存",
     "saving": "保存中…",

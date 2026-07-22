@@ -68,9 +68,10 @@ if you want preview deploys to work). Values come from your local
 | --- | --- | --- |
 | `SUPABASE_URL` | *(from your .env)* | Required. |
 | `SUPABASE_SERVICE_ROLE_KEY` | *(from your .env)* | Required. Server-only — never reaches the browser (no `NEXT_PUBLIC_` var exists in this app). |
-| `ALLOWED_EMAIL` | `mimomimomini0@gmail.com` | The only address allowed to log in. |
+| `ALLOWED_PASSWORD` | *(your chosen password)* | **The login gate.** Pick a strong, unique passphrase. Server-only — checked constant-time, never sent to the browser. |
 | `AUTH_ENABLED` | `1` | **Turns the login wall ON.** See step 4. |
 | `AUTH_SECRET` | *(generate — see below)* | HMAC key for the session cookie. Recommended so it's independent of the service key. |
+| `ALLOWED_EMAIL` | `mimomimomini0@gmail.com` | Identity/display only now (session label). Not the login gate. |
 
 **Generate `AUTH_SECRET`** (run locally, paste the output as the value):
 
@@ -93,26 +94,21 @@ Do **not** set these on Vercel:
 
 `AUTH_ENABLED=1` (step 3) activates `web/src/middleware.ts`, which redirects
 every route except `/login` to the login page until you have a valid session.
-The login flow:
+The login flow is a **single password** (no email involved):
 
-1. You enter `ALLOWED_EMAIL` → Supabase emails a **6-digit code**.
-2. You enter the code → the app sets a 30-day signed session cookie.
+1. You open the app → login page → type the `ALLOWED_PASSWORD`.
+2. The app sets a 30-day signed (`AUTH_SECRET`) httpOnly session cookie.
 
-**Supabase email-template gotcha [you] — do this or the code never arrives as a
-number:** by default Supabase's login email sends a *magic link*
-(`{{ .ConfirmationURL }}`), not a code. This app verifies a **typed 6-digit
-code**, so:
-
-- Supabase Dashboard → **Authentication → Email Templates → "Magic Link"** →
-  make sure the body includes **`{{ .Token }}`** (e.g. *"Your login code is
-  `{{ .Token }}`"*). Save.
-- Supabase Dashboard → **Authentication → URL Configuration → Site URL** → set
-  to your Vercel URL (e.g. `https://your-app.vercel.app`). Good hygiene.
+> **Why a password, not an emailed code:** the original design emailed a 6-digit
+> code, but Supabase's built-in mailer can't send a code without a **paid custom
+> SMTP** setup (it only sends a magic *link* on the free tier, and the template
+> is locked). A password gate is the pragmatic single-user choice — no email
+> infrastructure, nothing to deliver. No Supabase email/template config is
+> needed.
 
 **If you get locked out:** set `AUTH_ENABLED=0` in Vercel env vars and redeploy
-— the wall drops instantly. (The OTP round-trip has never been tested E2E
-because the code goes to your inbox, so keep this escape hatch in mind on first
-login.)
+— the wall drops instantly. To change the password, edit `ALLOWED_PASSWORD` in
+Vercel and redeploy.
 
 ---
 
@@ -121,10 +117,10 @@ login.)
 Trigger the deploy (push to `master`, or "Redeploy" in Vercel). After it's live:
 
 - [ ] Visiting the URL redirects to `/login` (proves the wall is up).
-- [ ] Enter your email → **code email arrives** (if it's a link instead, revisit
-      the `{{ .Token }}` template fix in step 4).
-- [ ] Enter code → lands on `/dashboard` with your real numbers
-      (last-12-mo total, KPI tiles, chart).
+- [ ] Enter your `ALLOWED_PASSWORD` → lands on `/dashboard` with your real
+      numbers (last-12-mo total, KPI tiles, chart). Wrong password just re-shows
+      the login with an error; "Login is not configured" means `ALLOWED_PASSWORD`
+      isn't set in Vercel.
 - [ ] `/transactions` lists rows; a filter works.
 - [ ] `/subscriptions`, `/costs`, `/owed`, `/duedates`, `/management` all load.
 - [ ] Header language toggle (EN/中文) and theme toggle (Day/Dark/System) work.
@@ -157,8 +153,8 @@ is a missing/typo'd env var from step 3.
 - Framework: Next.js (auto)
 
 **Env vars (Production):** `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
-`ALLOWED_EMAIL`, `AUTH_ENABLED=1`, `AUTH_SECRET`
+`ALLOWED_PASSWORD`, `AUTH_ENABLED=1`, `AUTH_SECRET`, `ALLOWED_EMAIL` (identity only)
 
-**Supabase:** Magic-Link template contains `{{ .Token }}`; Site URL = Vercel URL
+**Login:** single password (`ALLOWED_PASSWORD`). No Supabase email/SMTP setup needed.
 
-**Lockout escape:** `AUTH_ENABLED=0` → redeploy
+**Lockout escape:** `AUTH_ENABLED=0` → redeploy. **Change password:** edit `ALLOWED_PASSWORD` → redeploy.

@@ -59,14 +59,15 @@ npm start
 
 ## Auth (Phase 4)
 
-Passwordless email-OTP login, DISABLED by default. To enable: set
-`AUTH_ENABLED=1` in the parent `.env` and restart. Only `ALLOWED_EMAIL` may
-sign in; the 6-digit code arrives via Supabase Auth's built-in mailer.
-Locked out? Set `AUTH_ENABLED=0` again. Sessions last 30 days
-(HMAC-signed httpOnly cookie).
+Single-user **password** login, DISABLED by default. To enable: set
+`AUTH_ENABLED=1` and `ALLOWED_PASSWORD=<your passphrase>` and restart. The
+login page takes the password, compares it constant-time against
+`ALLOWED_PASSWORD`, and sets an `AUTH_SECRET`-signed httpOnly session cookie
+(30 days). Locked out? Set `AUTH_ENABLED=0` again. Change the password by
+editing `ALLOWED_PASSWORD` and restarting/redeploying.
 
-> The app verifies a **typed 6-digit code**, so Supabase's "Magic Link" email
-> template must include `{{ .Token }}` (the default template sends a link
-> instead). For the full cloud setup — Vercel Root Directory, the
-> "include files outside root" build option, env vars and this template fix —
-> see [`../DEPLOY.md`](../DEPLOY.md).
+> Email OTP was the original design, but Supabase's built-in mailer can't send
+> a 6-digit code without paid custom SMTP, so login is a password gate instead
+> — no email infrastructure required. For the full cloud setup (Vercel Root
+> Directory, the "include files outside root" build option, env vars) see
+> [`../DEPLOY.md`](../DEPLOY.md).

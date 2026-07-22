@@ -1,5 +1,7 @@
 {
-  "app": { "title": "Expense Tracker" },
+  "app": {
+    "title": "Expense Tracker"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "transactions": "Transactions",
@@ -14,16 +16,11 @@
   },
   "login": {
     "title": "Sign in",
-    "email": "Email",
-    "sendCode": "Send code",
-    "codeSent": "A 6-digit code was sent to {email}.",
-    "code": "Code",
-    "verify": "Verify & sign in",
-    "startOver": "Use a different email",
+    "password": "Password",
+    "signIn": "Sign in",
     "errors": {
-      "email": "This email is not authorised for this system.",
-      "send": "Could not send the code — try again in a minute.",
-      "code": "That code didn't match. Check it and try again."
+      "password": "Incorrect password. Please try again.",
+      "config": "Login is not configured yet. Set ALLOWED_PASSWORD in Vercel and redeploy."
     }
   },
   "storage": {
@@ -220,7 +217,10 @@
     "period": "Period",
     "ewalletIncluded": "of which e-wallet spending",
     "ewalletRow": "TNG eWallet",
-    "columns": { "card": "Card", "tag": "Business tag" },
+    "columns": {
+      "card": "Card",
+      "tag": "Business tag"
+    },
     "notes": {
       "transfers": "Wallet transfers are excluded from spending totals (owner decision Q1).",
       "refunds": "Refunds are their own series and are never netted into category totals."
@@ -320,8 +320,17 @@
       "overdue": "{card}: {amount} is {days, plural, one {# day} other {# days}} overdue"
     }
   },
-  "locale": { "label": "Language", "en": "EN", "zh": "中文" },
-  "theme": { "label": "Theme", "light": "Day mode", "dark": "Dark mode", "system": "System mode" },
+  "locale": {
+    "label": "Language",
+    "en": "EN",
+    "zh": "中文"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Day mode",
+    "dark": "Dark mode",
+    "system": "System mode"
+  },
   "common": {
     "save": "Save",
     "saving": "Saving…",
