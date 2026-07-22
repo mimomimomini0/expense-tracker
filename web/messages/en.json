@@ -189,7 +189,13 @@
       "tableToggle": "All categories ({count})"
     },
     "uncategorised": "Uncategorised",
-    "otherCategories": "Other ({count} categories)"
+    "otherCategories": "Other ({count} categories)",
+    "topMerchants": {
+      "title": "Top merchants — {category}",
+      "titleEmpty": "Top merchants",
+      "empty": "No spending to break down yet."
+    },
+    "otherMerchants": "Other ({count} merchants)"
   },
   "export": {
     "transactionsSheet": "Transactions",

@@ -1,6 +1,7 @@
 import "server-only";
 import { getSupabase } from "./supabase";
 import { ewalletSectorCategory } from "./ewallet-categories";
+import { merchantKey } from "./merchant-key";
 
 /** Dashboard aggregation (Phase 3, FR-10/FR-11 subset — owner Q7: charts first).
  *
@@ -36,6 +37,20 @@ export interface CategorySlice {
   total: number;
 }
 
+export interface MerchantSlice {
+  merchant: string; // merchantKey (normalised description)
+  total: number;
+}
+
+/** Merchant breakdown of the single highest-spending category (2nd donut). */
+export interface TopCategoryMerchants {
+  categoryId: number | null;
+  name_en: string;
+  name_zh: string | null;
+  total: number;
+  merchants: MerchantSlice[]; // sorted desc by total (ALL of them)
+}
+
 export interface UtilizationCard {
   cardId: number;
   label: string;
@@ -54,6 +69,7 @@ export interface CardBucket {
 export interface DashboardData {
   months: MonthBucket[];
   categories: CategorySlice[]; // sorted desc by total, ALL of them
+  topCategoryMerchants: TopCategoryMerchants | null; // merchants within categories[0]
   totals: { spending: number; fees: number; refunds: number; walletTransfers: number; ewallet: number };
   byCard: CardBucket[]; // sorted desc by spending (for the summary report)
   byTag: { tag: string; spending: number }[];
@@ -138,11 +154,11 @@ export async function getDashboardData(filters: DashboardFilters): Promise<Dashb
   type Tx = {
     txn_date: string; amount_rm: number; direction: "debit" | "credit";
     txn_type: string; category_id: number | null; card_account_id: number;
-    business_tag: string;
+    business_tag: string; description_raw: string;
   };
   const txns = await fetchAll<Tx>((a, b) => {
     let q = supabase.from("transactions")
-      .select("txn_date,amount_rm,direction,txn_type,category_id,card_account_id,business_tag")
+      .select("txn_date,amount_rm,direction,txn_type,category_id,card_account_id,business_tag,description_raw")
       .gte("txn_date", filters.from).lte("txn_date", filters.to);
     if (filters.cards?.length) q = q.in("card_account_id", filters.cards.map(Number));
     return q.order("id").range(a, b);
@@ -153,6 +169,13 @@ export async function getDashboardData(filters: DashboardFilters): Promise<Dashb
     monthKeys.map((m) => [m, { month: m, spending: 0, fees: 0, refunds: 0 }]),
   );
   const catTotals = new Map<string, CategorySlice>();
+  // per-category merchant totals, keyed by the same category key as catTotals
+  const merchantByCat = new Map<string, Map<string, number>>();
+  const addMerchant = (catKey: string, merchant: string, amount: number) => {
+    let m = merchantByCat.get(catKey);
+    if (!m) { m = new Map(); merchantByCat.set(catKey, m); }
+    m.set(merchant, (m.get(merchant) ?? 0) + amount);
+  };
   const totals = { spending: 0, fees: 0, refunds: 0, walletTransfers: 0, ewallet: 0 };
   const cardTotals = new Map<number | null, CardBucket>();
   const tagTotals = new Map<string, number>();
@@ -177,6 +200,7 @@ export async function getDashboardData(filters: DashboardFilters): Promise<Dashb
     };
     slice.total += amount;
     catTotals.set(key, slice);
+    return key;
   };
 
   for (const t of txns) {
@@ -203,7 +227,8 @@ export async function getDashboardData(filters: DashboardFilters): Promise<Dashb
     totals.spending += amount;
     cardBucket(t.card_account_id).spending += amount;
     tagTotals.set(t.business_tag, (tagTotals.get(t.business_tag) ?? 0) + amount);
-    addCat(t.category_id, amount);
+    const cKey = addCat(t.category_id, amount);
+    addMerchant(cKey, merchantKey(t.description_raw) || "UNKNOWN", amount);
   }
 
   if (filters.ewallet && !filters.cards?.length) {
@@ -226,7 +251,8 @@ export async function getDashboardData(filters: DashboardFilters): Promise<Dashb
       tagTotals.set("personal", (tagTotals.get("personal") ?? 0) + amount);
       const name = ewalletSectorCategory(r.sector);
       const cat = name ? (cats.data ?? []).find((c) => c.name_en === name) : undefined;
-      addCat((cat?.id as number | undefined) ?? null, amount);
+      const cKey = addCat((cat?.id as number | undefined) ?? null, amount);
+      addMerchant(cKey, `TNG ${(r.sector ?? "usage").toUpperCase()}`, amount);
     }
   }
 
@@ -269,9 +295,25 @@ export async function getDashboardData(filters: DashboardFilters): Promise<Dashb
     b.label = card?.display_name ?? `${card?.banks?.name ?? "?"} ••${card?.last4 ?? "????"}`;
   }
 
+  const sortedCats = [...catTotals.values()].sort((a, b) => b.total - a.total);
+  // second donut: merchant breakdown of the single biggest-spending category
+  const topCat = sortedCats.find((c) => c.total > 0) ?? null;
+  const topCategoryMerchants: TopCategoryMerchants | null = topCat
+    ? {
+        categoryId: topCat.categoryId,
+        name_en: topCat.name_en,
+        name_zh: topCat.name_zh,
+        total: topCat.total,
+        merchants: [...(merchantByCat.get(topCat.key) ?? new Map<string, number>())]
+          .map(([merchant, total]) => ({ merchant, total }))
+          .sort((a, b) => b.total - a.total),
+      }
+    : null;
+
   return {
     months: monthKeys.map((m) => byMonth.get(m)!),
-    categories: [...catTotals.values()].sort((a, b) => b.total - a.total),
+    categories: sortedCats,
+    topCategoryMerchants,
     totals,
     byCard: [...cardTotals.values()].sort((a, b) => b.spending - a.spending),
     byTag: [...tagTotals.entries()]

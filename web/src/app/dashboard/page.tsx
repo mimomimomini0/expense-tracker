@@ -230,6 +230,37 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
     return params.toString();
   };
 
+  // ---------- second donut: top merchants within the biggest category ----------
+  const tcm = data.topCategoryMerchants;
+  const mTop = tcm ? tcm.merchants.slice(0, TOP_N) : [];
+  const mTail = tcm ? tcm.merchants.slice(TOP_N) : [];
+  const mTailTotal = mTail.reduce((s, m) => s + m.total, 0);
+  const merchantTotal = tcm ? tcm.total : 0;
+  const mCatName = tcm
+    ? catName({ name_en: tcm.name_en, name_zh: tcm.name_zh, key: tcm.categoryId != null ? tcm.name_en : "__uncategorised" })
+    : "";
+  const mArcs: Arc[] = mTop.map((m, i) => ({
+    label: m.merchant,
+    value: m.total,
+    color: SLOTS[i]!,
+    href: `/transactions?${qs({ merchant: m.merchant, category: tcm?.categoryId != null ? String(tcm.categoryId) : undefined })}`,
+  }));
+  if (mTailTotal > 0) mArcs.push({ label: t("otherMerchants", { count: mTail.length }), value: mTailTotal, color: SLOTS[7]!, href: null });
+  let mAngle = -Math.PI / 2;
+  const mPaths = mArcs.map((a) => {
+    const frac = merchantTotal > 0 ? a.value / merchantTotal : 0;
+    const a0 = mAngle;
+    const a1 = mAngle + frac * 2 * Math.PI;
+    mAngle = a1;
+    const large = a1 - a0 > Math.PI ? 1 : 0;
+    const p = (r: number, ang: number) => `${(CX + r * Math.cos(ang)).toFixed(2)} ${(CY + r * Math.sin(ang)).toFixed(2)}`;
+    return {
+      ...a,
+      frac,
+      d: `M ${p(R, a0)} A ${R} ${R} 0 ${large} 1 ${p(R, a1)} L ${p(HOLE, a1)} A ${HOLE} ${HOLE} 0 ${large} 0 ${p(HOLE, a0)} Z`,
+    };
+  });
+
   return (
     <>
       <h1>{t("title")}</h1>
@@ -428,6 +459,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
         </details>
       </section>
 
+      <div className="donut-cards">
       <section className="viz-card">
         <h2>{t("categories.title")}</h2>
         <div className="donut-row">
@@ -492,6 +524,45 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
           </table>
         </details>
       </section>
+
+      <section className="viz-card">
+        <h2>{tcm ? t("topMerchants.title", { category: mCatName }) : t("topMerchants.titleEmpty")}</h2>
+        {tcm && mPaths.length > 0 ? (
+          <>
+            <div className="donut-row">
+              <svg viewBox="0 0 200 200" className="donut" role="img" aria-label={t("topMerchants.title", { category: mCatName })}>
+                {mPaths.map((p) => {
+                  const shape = (
+                    <path d={p.d} fill={p.color} stroke="var(--surface, #fcfcfb)" strokeWidth="2">
+                      <title>{`${p.label}: ${formatRM(p.value)} (${(p.frac * 100).toFixed(1)}%)`}</title>
+                    </path>
+                  );
+                  return p.href ? <a key={p.label} href={p.href}>{shape}</a> : <g key={p.label}>{shape}</g>;
+                })}
+                <text x={CX} y={CY - 4} textAnchor="middle" className="donut-center-value">
+                  {Math.round(merchantTotal).toLocaleString()}
+                </text>
+                <text x={CX} y={CY + 14} textAnchor="middle" className="donut-center-label">
+                  {t("categories.centerLabel")}
+                </text>
+              </svg>
+              <ul className="donut-legend">
+                {mPaths.map((p) => (
+                  <li key={p.label}>
+                    <i className="key" style={{ background: p.color }} />
+                    {p.href ? <a href={p.href}>{p.label}</a> : <span>{p.label}</span>}
+                    <b>{formatRM(p.value)}</b>
+                    <span className="muted">{(p.frac * 100).toFixed(1)}%</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </>
+        ) : (
+          <p className="muted">{t("topMerchants.empty")}</p>
+        )}
+      </section>
+      </div>
     </>
   );
 }

@@ -189,7 +189,13 @@
       "tableToggle": "全部分类（{count}）"
     },
     "uncategorised": "未分类",
-    "otherCategories": "其他（{count} 个分类）"
+    "otherCategories": "其他（{count} 个分类）",
+    "topMerchants": {
+      "title": "商户占比 — {category}",
+      "titleEmpty": "商户占比",
+      "empty": "暂无可细分的开支。"
+    },
+    "otherMerchants": "其他（{count} 个商户）"
   },
   "export": {
     "transactionsSheet": "交易记录",
