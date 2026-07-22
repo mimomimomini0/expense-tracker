@@ -106,3 +106,11 @@ console.log(`\nAPI spend this run: ${runCosts.length} calls, ≈ USD ${usd.toFix
 const statements = await store.listStatements();
 const txCount = (await store.listTransactions()).length;
 console.log(`database now: ${statements.length} statements, ${txCount} transactions`);
+
+// self-learning loop: apply the learned merchant rules to the newly imported
+// transactions so known merchants auto-categorise (FR-7). Rules the owner
+// confirmed at any point in the past are reused here.
+if (outcomes.some((o) => o.outcome === "parsed_ok" || o.outcome === "needs_review")) {
+  console.log(`\nNEXT: run  npx tsx scripts/classify-persist.ts  to auto-categorise the new`);
+  console.log(`transactions from your learned merchant rules (${(await store.client.from("merchant_rules").select("id", { count: "exact", head: true })).count ?? "?"} rules).`);
+}

@@ -7,7 +7,10 @@ export const dynamic = "force-dynamic";
 
 const TABLES = [
   "banks", "card_accounts", "statements", "statement_cards", "transactions",
-  "categories", "merchant_rules", "instalment_plans", "payment_cycles",
+  // learned merchant → category rules + merge/rename aliases: the "self-learned"
+  // knowledge that must survive a reinstall and travel with the backup
+  "categories", "merchant_rules", "merchant_aliases",
+  "instalment_plans", "payment_cycles",
   "upload_rejections", "edit_log", "api_cost_log",
   "ewallet_accounts", "ewallet_cards", "ewallet_statements", "ewallet_transactions",
   "companies", "user_profiles",
