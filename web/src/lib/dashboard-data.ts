@@ -74,6 +74,45 @@ async function fetchAll<T>(build: (from: number, to: number) => PromiseLike<{ da
   return rows;
 }
 
+/** Lean spending-only total for a window — powers the prior-period comparison
+ *  on the dashboard without re-running the full aggregation. Same money rules
+ *  as getDashboardData: purchase/instalment/cash_advance debits, MINUS the
+ *  Wallet Transfers category, PLUS e-wallet usage (when e-wallet is on and no
+ *  card filter is active). */
+export async function getPeriodSpending(filters: DashboardFilters): Promise<number> {
+  const supabase = getSupabase();
+  const cats = await supabase.from("categories").select("id,name_en").is("user_id", null);
+  if (cats.error) throw new Error(cats.error.message);
+  const walletId = (cats.data ?? []).find((c) => c.name_en === "Wallet Transfers")?.id as number | undefined;
+
+  type Row = { amount_rm: number; txn_type: string; category_id: number | null };
+  let total = 0;
+  const rows = await fetchAll<Row>((a, b) => {
+    let q = supabase.from("transactions")
+      .select("amount_rm,txn_type,category_id")
+      .in("txn_type", ["purchase", "instalment", "cash_advance"])
+      .gte("txn_date", filters.from).lte("txn_date", filters.to);
+    if (filters.card) q = q.eq("card_account_id", Number(filters.card));
+    return q.order("id").range(a, b);
+  });
+  for (const r of rows) {
+    if (walletId != null && r.category_id === walletId) continue;
+    total += Number(r.amount_rm);
+  }
+
+  if (filters.ewallet && !filters.card) {
+    type Ew = { amount_rm: number };
+    const ew = await fetchAll<Ew>((a, b) =>
+      supabase.from("ewallet_transactions").select("amount_rm")
+        .eq("kind", "usage")
+        .gte("trans_date", filters.from).lte("trans_date", filters.to)
+        .order("id").range(a, b),
+    );
+    for (const r of ew) total += Number(r.amount_rm);
+  }
+  return total;
+}
+
 function monthsBetween(fromIso: string, toIso: string): string[] {
   const out: string[] = [];
   let [y, m] = [Number(fromIso.slice(0, 4)), Number(fromIso.slice(5, 7))];

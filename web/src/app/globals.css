@@ -949,3 +949,9 @@ table.data.coverage th.cov-th { text-align: center; }
 .owed-people li b { margin-left: auto; font-variant-numeric: tabular-nums; }
 .owed-table .party-form { display: flex; gap: 0.3rem; align-items: center; }
 .owed-table .party-input { width: 120px; }
+
+/* dashboard prior-period delta (spending up = bad) */
+.stat-delta { font-size: 0.78rem; font-weight: 600; margin-top: 0.2rem; }
+.stat-delta.bad { color: var(--status-crit); }
+.stat-delta.good { color: var(--status-good-text); }
+.stat-delta .muted { font-weight: 400; }

@@ -1,6 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { getCards } from "@/lib/data";
-import { getDashboardData, type DashboardData, type DashboardFilters } from "@/lib/dashboard-data";
+import { getDashboardData, getPeriodSpending, type DashboardData, type DashboardFilters } from "@/lib/dashboard-data";
 import { getUpcomingPayments, type UpcomingPayment } from "@/lib/payments-data";
 import { getDisputeAlerts, type DisputeAlert } from "@/lib/flags-data";
 import { cardLabel, formatRM } from "@/lib/format";
@@ -52,6 +52,48 @@ function monthEnd(m: string): string {
   return new Date(Date.UTC(y, mo, 0)).toISOString().slice(0, 10);
 }
 
+interface Period {
+  label: string; sub: string | null; from: string; to: string;
+  spending: number; fees: number; refunds: number;
+}
+
+/** Roll the monthly buckets up to the chosen granularity (FR-11). */
+function aggregatePeriods(
+  months: { month: string; spending: number; fees: number; refunds: number }[],
+  gran: "month" | "quarter" | "year",
+  locale: string,
+): Period[] {
+  if (gran === "month") {
+    return months.map((m) => ({
+      label: monthShort(m.month, locale),
+      sub: m.month.endsWith("-01") ? m.month.slice(0, 4) : null,
+      from: `${m.month}-01`, to: monthEnd(m.month),
+      spending: m.spending, fees: m.fees, refunds: m.refunds,
+    }));
+  }
+  const groups = new Map<string, Period>();
+  const order: string[] = [];
+  for (const m of months) {
+    const y = m.month.slice(0, 4);
+    const mo = Number(m.month.slice(5, 7));
+    const key = gran === "year" ? y : `${y}-Q${Math.ceil(mo / 3)}`;
+    let g = groups.get(key);
+    if (!g) {
+      g = {
+        label: gran === "year" ? y : `Q${Math.ceil(mo / 3)}`,
+        sub: gran === "year" ? null : y,
+        from: `${m.month}-01`, to: monthEnd(m.month),
+        spending: 0, fees: 0, refunds: 0,
+      };
+      groups.set(key, g);
+      order.push(key);
+    }
+    g.to = monthEnd(m.month); // extend to the latest month in the group
+    g.spending += m.spending; g.fees += m.fees; g.refunds += m.refunds;
+  }
+  return order.map((k) => groups.get(k)!);
+}
+
 export default async function DashboardPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const def = defaultRange();
@@ -62,6 +104,21 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
     ewallet: first(sp.ew) !== "0",
   };
 
+  const GRANS = ["month", "quarter", "year"] as const;
+  const granularity = (GRANS as readonly string[]).includes(first(sp.g) ?? "")
+    ? (first(sp.g) as (typeof GRANS)[number])
+    : "month";
+
+  // prior window of equal length immediately before `from` (FR-17 comparison)
+  const dayMs = 86_400_000;
+  const fromMs = Date.parse(filters.from);
+  const spanMs = Date.parse(filters.to) - fromMs;
+  const prevFilters: DashboardFilters = {
+    ...filters,
+    to: new Date(fromMs - dayMs).toISOString().slice(0, 10),
+    from: new Date(fromMs - dayMs - spanMs).toISOString().slice(0, 10),
+  };
+
   const locale = await getLocale();
   const t = await getTranslations("dashboard");
   const tc = await getTranslations("common");
@@ -70,10 +127,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
   let cards: Awaited<ReturnType<typeof getCards>> = [];
   let payments: UpcomingPayment[] = [];
   let disputes: DisputeAlert[] = [];
+  let prevSpending = 0;
   let loadError: string | null = null;
   try {
-    [data, cards, payments, disputes] = await Promise.all([
+    [data, cards, payments, disputes, prevSpending] = await Promise.all([
       getDashboardData(filters), getCards(), getUpcomingPayments(), getDisputeAlerts(),
+      getPeriodSpending(prevFilters),
     ]);
   } catch (e) {
     loadError = e instanceof Error ? e.message : String(e);
@@ -93,14 +152,21 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
   const monthCount = data.months.length;
   const avg = monthCount > 0 ? data.totals.spending / monthCount : 0;
 
-  // ---------- monthly chart geometry (server-computed, div marks) ----------
+  // FR-17 comparison: this period's spending vs the equal-length prior window.
+  // Spending UP is bad (red), DOWN is good (green).
+  const spendDelta = prevSpending > 0
+    ? { pct: ((data.totals.spending - prevSpending) / prevSpending) * 100, prev: prevSpending }
+    : null;
+
+  // ---------- outflow chart geometry (granularity-aware) ----------
+  const periods = aggregatePeriods(data.months, granularity, locale);
   const PLOT_H = 220;
-  const yMax = niceCeil(Math.max(1, ...data.months.map((m) => Math.max(m.spending + m.fees, m.refunds))));
+  const yMax = niceCeil(Math.max(1, ...periods.map((p) => Math.max(p.spending + p.fees, p.refunds))));
   const px = (v: number) => Math.round((v / yMax) * PLOT_H);
   const ticks = [0.25, 0.5, 0.75, 1].map((f) => yMax * f);
-  const maxMonth = data.months.reduce(
-    (best, m) => (m.spending + m.fees > best.spending + best.fees ? m : best),
-    data.months[0]!,
+  const maxPeriod = periods.reduce(
+    (best, p) => (p.spending + p.fees > best.spending + best.fees ? p : best),
+    periods[0] ?? { spending: 0, fees: 0 } as Period,
   );
 
   // ---------- donut geometry: top 7 + Other ----------
@@ -146,7 +212,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
 
   const qs = (over: Record<string, string | undefined>) => {
     const params = new URLSearchParams();
-    const merged = { from: filters.from, to: filters.to, card: filters.card, ew: filters.ewallet ? undefined : "0", ...over };
+    const merged = {
+      from: filters.from, to: filters.to, card: filters.card,
+      ew: filters.ewallet ? undefined : "0",
+      g: granularity === "month" ? undefined : granularity,
+      ...over,
+    };
     for (const [k, v] of Object.entries(merged)) if (v !== undefined) params.set(k, v);
     return params.toString();
   };
@@ -180,6 +251,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
             <option value="0">{t("filters.ewalletOff")}</option>
           </select>
         </label>
+        <label>
+          {t("filters.granularity")}
+          <select name="g" defaultValue={granularity}>
+            <option value="month">{t("granularity.month")}</option>
+            <option value="quarter">{t("granularity.quarter")}</option>
+            <option value="year">{t("granularity.year")}</option>
+          </select>
+        </label>
         <button type="submit">{t("filters.apply")}</button>
         <a className="btn-secondary" href="/dashboard">{t("filters.reset")}</a>
         <a
@@ -195,6 +274,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
         <div className="stat-tile hero">
           <div className="stat-label">{t("tiles.totalSpending")}</div>
           <div className="stat-value">{formatRM(data.totals.spending)}</div>
+          {spendDelta && Math.abs(spendDelta.pct) >= 0.5 && (
+            <div className={`stat-delta ${spendDelta.pct > 0 ? "bad" : "good"}`}>
+              {spendDelta.pct > 0 ? "▲" : "▼"} {Math.abs(spendDelta.pct).toFixed(0)}%{" "}
+              <span className="muted">{t("tiles.vsPrev")}</span>
+            </div>
+          )}
           {data.totals.ewallet > 0 && (
             <div className="stat-sub">{t("tiles.ewalletPart", { amount: formatRM(data.totals.ewallet) })}</div>
           )}
@@ -250,32 +335,33 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
             ))}
             <div className="baseline" />
             <div className="bands">
-              {data.months.map((m) => {
-                const tip = `${monthShort(m.month, locale)} ${m.month.slice(0, 4)}\n${t("monthly.spending")}: ${formatRM(m.spending)}\n${t("monthly.fees")}: ${formatRM(m.fees)}\n${t("monthly.refunds")}: ${formatRM(m.refunds)}`;
+              {periods.map((p, i) => {
+                const title = p.sub ? `${p.label} ${p.sub}` : p.label;
+                const tip = `${title}\n${t("monthly.spending")}: ${formatRM(p.spending)}\n${t("monthly.fees")}: ${formatRM(p.fees)}\n${t("monthly.refunds")}: ${formatRM(p.refunds)}`;
                 return (
                   <a
-                    key={m.month}
+                    key={`${p.from}-${i}`}
                     className="band"
                     data-tip={tip}
-                    href={`/transactions?from=${m.month}-01&to=${monthEnd(m.month)}`}
+                    href={`/transactions?from=${p.from}&to=${p.to}`}
                   >
                     <div className="marks">
                       <div className="stack">
-                        {m.fees > 0 && (
-                          <div className="seg seg-top" style={{ height: Math.max(px(m.fees), m.fees > 0 ? 3 : 0), background: S_FEES }} />
+                        {p.fees > 0 && (
+                          <div className="seg seg-top" style={{ height: Math.max(px(p.fees), 3), background: S_FEES }} />
                         )}
                         <div
-                          className={m.fees > 0 ? "seg" : "seg seg-top"}
-                          style={{ height: px(m.spending), background: S_SPENDING }}
+                          className={p.fees > 0 ? "seg" : "seg seg-top"}
+                          style={{ height: px(p.spending), background: S_SPENDING }}
                         />
                       </div>
-                      {m.refunds > 0 && (
-                        <div className="seg seg-top refund-col" style={{ height: Math.max(px(m.refunds), 3), background: S_REFUNDS }} />
+                      {p.refunds > 0 && (
+                        <div className="seg seg-top refund-col" style={{ height: Math.max(px(p.refunds), 3), background: S_REFUNDS }} />
                       )}
                     </div>
-                    {m === maxMonth && m.spending + m.fees > 0 && (
-                      <span className="direct-label" style={{ bottom: px(m.spending + m.fees) + 4 }}>
-                        {Math.round(m.spending + m.fees).toLocaleString()}
+                    {p === maxPeriod && p.spending + p.fees > 0 && (
+                      <span className="direct-label" style={{ bottom: px(p.spending + p.fees) + 4 }}>
+                        {Math.round(p.spending + p.fees).toLocaleString()}
                       </span>
                     )}
                   </a>
@@ -284,12 +370,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
             </div>
           </div>
           <div className="month-labels">
-            {data.months.map((m) => (
-              <span key={m.month} className="month-label">
-                {monthShort(m.month, locale)}
-                {(m.month.endsWith("-01") || m.month === data.months[0]!.month) && (
-                  <em>{m.month.slice(0, 4)}</em>
-                )}
+            {periods.map((p, i) => (
+              <span key={`${p.from}-${i}`} className="month-label">
+                {p.label}
+                {p.sub && <em>{p.sub}</em>}
               </span>
             ))}
           </div>
@@ -306,12 +390,12 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
               </tr>
             </thead>
             <tbody>
-              {data.months.map((m) => (
-                <tr key={m.month}>
-                  <td>{m.month}</td>
-                  <td className="amount-cell">{formatRM(m.spending)}</td>
-                  <td className="amount-cell">{formatRM(m.fees)}</td>
-                  <td className="amount-cell">{formatRM(m.refunds)}</td>
+              {periods.map((p, i) => (
+                <tr key={`${p.from}-${i}`}>
+                  <td>{p.sub ? `${p.label} ${p.sub}` : p.label}</td>
+                  <td className="amount-cell">{formatRM(p.spending)}</td>
+                  <td className="amount-cell">{formatRM(p.fees)}</td>
+                  <td className="amount-cell">{formatRM(p.refunds)}</td>
                 </tr>
               ))}
             </tbody>

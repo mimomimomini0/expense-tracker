@@ -137,13 +137,20 @@
       "ewallet": "E-wallet spending",
       "ewalletOn": "Included",
       "ewalletOff": "Excluded",
+      "granularity": "View by",
       "apply": "Apply",
       "reset": "Reset",
       "report": "Download report",
       "reportTitle": "Excel summary report for the current filters"
     },
+    "granularity": {
+      "month": "Monthly",
+      "quarter": "Quarterly",
+      "year": "Yearly"
+    },
     "tiles": {
       "totalSpending": "Total spending",
+      "vsPrev": "vs previous period",
       "ewalletPart": "incl. {amount} e-wallet",
       "monthlyAverage": "Monthly average",
       "fees": "Fees & interest",

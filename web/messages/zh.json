@@ -137,13 +137,20 @@
       "ewallet": "电子钱包消费",
       "ewalletOn": "包含",
       "ewalletOff": "不包含",
+      "granularity": "视图",
       "apply": "应用",
       "reset": "重置",
       "report": "下载报告",
       "reportTitle": "按当前筛选条件生成 Excel 汇总报告"
     },
+    "granularity": {
+      "month": "按月",
+      "quarter": "按季度",
+      "year": "按年"
+    },
     "tiles": {
       "totalSpending": "总消费",
+      "vsPrev": "较上一周期",
       "ewalletPart": "含电子钱包 {amount}",
       "monthlyAverage": "月均消费",
       "fees": "费用与利息",
