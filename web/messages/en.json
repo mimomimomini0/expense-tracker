@@ -15,7 +15,7 @@
     "logout": "Log out"
   },
   "login": {
-    "title": "Sign in",
+    "title": "Expenses tracking system",
     "password": "Password",
     "signIn": "Sign in",
     "errors": {

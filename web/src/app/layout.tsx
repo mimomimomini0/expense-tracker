@@ -16,7 +16,10 @@ import "./globals.css";
 export const dynamic = "force-dynamic";
 
 export const viewport = {
-  themeColor: "#0f6b4f"
+  themeColor: "#0f6b4f",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5
 };
 
 export const metadata: Metadata = {

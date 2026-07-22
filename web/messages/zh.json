@@ -15,7 +15,7 @@
     "logout": "退出登录"
   },
   "login": {
-    "title": "登录",
+    "title": "开支追踪系统",
     "password": "密码",
     "signIn": "登录",
     "errors": {

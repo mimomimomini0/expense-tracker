@@ -968,3 +968,57 @@ table.data.coverage th.cov-th { text-align: center; }
 .reconcile-result h3 { font-size: 0.85rem; margin: 0.7rem 0 0.3rem; }
 .reconcile-list { list-style: none; margin: 0; padding: 0; }
 .reconcile-list li { font-size: 0.8rem; padding: 0.12rem 0; }
+
+/* ---------- responsive: phones & small screens ---------- */
+
+/* Never let the whole page scroll sideways. Wide tables live inside their own
+   .table-wrap (overflow-x: auto) and scroll independently; this just stops
+   stray content from pushing the viewport wider than the screen. */
+html, body { max-width: 100%; overflow-x: hidden; }
+img, svg, table { max-width: 100%; }
+
+@media (max-width: 720px) {
+  main { padding: 0.85rem 0.7rem 3rem; }
+  h1 { font-size: 1.2rem; }
+
+  /* Header: brand + toggles stay on the top row; the nav drops to its own
+     full-width, horizontally scrollable strip beneath them (swipe to reach
+     the later links) instead of overflowing the page. */
+  .site-header {
+    flex-wrap: wrap;
+    gap: 0.45rem 0.7rem;
+    padding: 0.5rem 0.7rem;
+  }
+  .site-header .brand { flex: 1; }
+  .site-header nav {
+    order: 10;
+    flex: 1 0 100%;
+    overflow-x: auto;
+    gap: 0.3rem;
+    padding-bottom: 0.15rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .site-header nav::-webkit-scrollbar { display: none; }
+  .site-header nav a { white-space: nowrap; padding: 0.3rem 0.55rem; }
+
+  /* Filters: each control takes a full row so nothing runs off the edge. */
+  .filters { gap: 0.55rem; padding: 0.7rem 0.8rem; }
+  .filters > label { flex: 1 1 100%; }
+  .filters input, .filters select { width: 100%; box-sizing: border-box; }
+
+  /* Tighten card padding to reclaim horizontal space. */
+  .stat-tile, .panel, .filters { padding-left: 0.8rem; padding-right: 0.8rem; }
+
+  /* Summary ("mini") tables hold short values — let them shrink to fit the
+     screen instead of forcing 960px (which would clip columns). Big detail
+     tables (transactions, categories) keep their width and scroll inside
+     their .table-wrap container. */
+  table.data.mini { min-width: 0; }
+  table.data.mini th, table.data.mini td { padding: 0.4rem 0.45rem; }
+}
+
+/* Extra squeeze for narrow phones: single-column KPI/stat tiles. */
+@media (max-width: 430px) {
+  .kpi-row, .form-grid { grid-template-columns: 1fr; }
+}
