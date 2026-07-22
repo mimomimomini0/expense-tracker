@@ -97,7 +97,7 @@ export async function importPdf(
 ): Promise<ImportOutcome> {
   const fileHash = sha256(pdf);
 
-  const logUsage = async (purpose: "gate" | "extract" | "reparse", u: LlmUsage) => {
+  const logUsage = async (purpose: "gate" | "extract" | "reparse" | "escalate", u: LlmUsage) => {
     await store.logApiCost({
       statement_filename: filename, purpose, model: u.model,
       tokens_in: u.tokensIn, tokens_out: u.tokensOut,
@@ -177,6 +177,26 @@ export async function importPdf(
     }
   }
 
+  // Model escalation: the primary extractor is the cheaper model, and if a
+  // statement still fails arithmetic reconciliation after the self-correcting
+  // re-parse, we escalate ONCE to the stronger model before flagging it for
+  // review. The reconciliation check is the trust gate — a mismatch is never
+  // committed regardless of model; escalation just gives the stronger model a
+  // chance to read a genuinely hard statement correctly.
+  if (mismatched.length > 0) {
+    retryCount += 1;
+    const escalated = await extractor.escalate(pdf, fileHash, reconciliationFeedback(extraction));
+    await logUsage("escalate", escalated.usage);
+    if (!invalid(escalated.result)) {
+      const escResolved = resolveCards(escalated.result);
+      extraction = escalated.result;
+      attempt = escalated;
+      cards = escResolved.cards;
+      dateFlags = escResolved.dateFlags;
+      mismatched = escResolved.cards.filter((c) => c.delta !== 0);
+    }
+  }
+
   const stmtDate = extraction.statement_date!;
   const due = extraction.payment_due_date_raw
     ? resolveDueDate(extraction.payment_due_date_raw, stmtDate)
@@ -187,7 +207,8 @@ export async function importPdf(
   const reviewReasons: string[] = [];
   for (const c of mismatched) {
     reviewReasons.push(
-      `card ${c.extracted.last4}: reconciliation delta RM ${formatRm(c.delta)} after ${retryCount} automatic re-parse`,
+      `card ${c.extracted.last4}: reconciliation delta RM ${formatRm(c.delta)} after ` +
+        `${retryCount} automatic re-parse/escalation attempt${retryCount === 1 ? "" : "s"}`,
     );
   }
   reviewReasons.push(...dateFlags);

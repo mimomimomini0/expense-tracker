@@ -244,27 +244,35 @@ class CorruptingExtractor implements Extractor {
   gate(pdf: Buffer, hash: string): Promise<LlmCallOutcome<GateResult>> {
     return this.base.gate(pdf, hash);
   }
-  async extract(pdf: Buffer, hash: string, _feedback: string | null): Promise<LlmCallOutcome<ExtractionResult>> {
-    // Replays the cached extraction with ONE amount altered — simulating a
-    // statement whose printed amount was corrupted. The retry sees the same
-    // corrupted document, so reconciliation must fail twice.
+  // Replays the cached extraction with ONE amount altered — simulating a
+  // statement whose printed amount is genuinely unreadable. Every attempt
+  // (primary, re-parse, and the stronger-model escalation) sees the same
+  // corruption, so reconciliation must fail on all of them. Delegating to the
+  // cached base.extract keeps this offline — no real API call fires.
+  private async corrupt(pdf: Buffer, hash: string): Promise<LlmCallOutcome<ExtractionResult>> {
     const out = await this.base.extract(pdf, hash, null);
     const clone = structuredClone(out.result) as ExtractionResult;
     const txn = clone.cards[0]?.transactions[0];
     if (txn) txn.amount_rm = Math.round((txn.amount_rm + 1) * 100) / 100;
     return { ...out, result: clone };
   }
+  extract(pdf: Buffer, hash: string, _feedback: string | null): Promise<LlmCallOutcome<ExtractionResult>> {
+    return this.corrupt(pdf, hash);
+  }
+  escalate(pdf: Buffer, hash: string, _feedback: string): Promise<LlmCallOutcome<ExtractionResult>> {
+    return this.corrupt(pdf, hash);
+  }
 }
 
 describe("corrupted copy (one amount altered)", () => {
-  it("lands in needs_review with nothing committed, after one automatic re-parse", async () => {
+  it("lands in needs_review with nothing committed, after re-parse then escalation", async () => {
     const store = new MemoryStore();
     const extractor = new CorruptingExtractor(new CachingExtractor());
     const outcome = await importPdf(
       store, extractor, "eStatement20260519_CORRUPTED.pdf", loadPdf("eStatement20260519.pdf"),
     );
     expect(outcome.outcome).toBe("needs_review");
-    expect(outcome.retryCount, "exactly one automatic self-correcting re-parse").toBe(1);
+    expect(outcome.retryCount, "one self-correcting re-parse plus one model escalation").toBe(2);
     const statements = await store.listStatements();
     expect(statements.length).toBe(1);
     expect(statements[0]!.status).toBe("needs_review");

@@ -165,7 +165,7 @@ export interface RejectionRow {
 export interface ApiCostRow {
   id: number;
   statement_filename: string | null;
-  purpose: "gate" | "extract" | "reparse" | "estimate";
+  purpose: "gate" | "extract" | "reparse" | "escalate" | "estimate";
   model: string;
   tokens_in: number;
   tokens_out: number;

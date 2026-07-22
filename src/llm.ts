@@ -12,11 +12,22 @@ import { z } from "zod";
 import type { ExtractionResult, GateResult } from "./types.js";
 
 export const MODEL = "claude-sonnet-5";
+// Primary extractor (owner decision 2026-07-22, after the model-accuracy test:
+// Haiku 4.5 matched Sonnet 5 exactly on every sampled statement — 354/354 rows,
+// all reconciling to printed balances — at ~1/3 the cost). Statement extraction
+// runs on Haiku; the doc-type gate and the reconciliation-failure fallback stay
+// on the stronger MODEL. The per-card arithmetic check (reconcileCard) is the
+// trust gate that makes the cheaper model safe: a mismatch is never committed,
+// it escalates to MODEL, and only a still-unreconciled result is flagged.
+export const EXTRACT_MODEL = "claude-haiku-4-5";
 export const PROMPT_VERSION = "p1";
 
-// Claude Sonnet 5 introductory pricing (through 2026-08-31): $2/M in, $10/M out.
-const USD_PER_M_IN = 2;
-const USD_PER_M_OUT = 10;
+// Per-model pricing, USD per 1M tokens. Sonnet 5 is on introductory pricing
+// through 2026-08-31 ($2/$10; rises to $3/$15 after); Haiku 4.5 is $1/$5.
+const PRICING: Record<string, { in: number; out: number }> = {
+  "claude-sonnet-5": { in: 2, out: 10 },
+  "claude-haiku-4-5": { in: 1, out: 5 },
+};
 const USD_TO_RM = 4.7; // approximate, for FR-17 display only
 
 export interface LlmUsage {
@@ -28,8 +39,13 @@ export interface LlmUsage {
   fromCache: boolean;
 }
 
-export function costOf(tokensIn: number, tokensOut: number): { usd: number; rm: number } {
-  const usd = (tokensIn / 1e6) * USD_PER_M_IN + (tokensOut / 1e6) * USD_PER_M_OUT;
+export function costOf(
+  tokensIn: number,
+  tokensOut: number,
+  model: string = MODEL,
+): { usd: number; rm: number } {
+  const p = PRICING[model] ?? PRICING[MODEL]!;
+  const usd = (tokensIn / 1e6) * p.in + (tokensOut / 1e6) * p.out;
   return { usd, rm: usd * USD_TO_RM };
 }
 
@@ -310,6 +326,7 @@ async function callStructured<T>(
   schema: object,
   validate: (raw: unknown) => T,
   maxTokens = 32000,
+  model: string = MODEL,
 ): Promise<{ result: T; usage: { input_tokens: number; output_tokens: number }; model: string }> {
   const fullSystem =
     `${system}\n\nRespond with a SINGLE JSON object conforming exactly to this JSON Schema — ` +
@@ -317,7 +334,7 @@ async function callStructured<T>(
 
   const attemptOnce = async () => {
     const stream = client().messages.stream({
-      model: MODEL,
+      model,
       max_tokens: maxTokens,
       system: fullSystem,
       messages: [
@@ -370,10 +387,11 @@ export async function cachedCall<T>(
   schema: object,
   validate: (raw: unknown) => T,
   maxTokens?: number,
+  model?: string,
 ): Promise<LlmCallOutcome<T>> {
   const hit = readCache<T>(fileHash, kind);
   if (hit) {
-    const { usd, rm } = costOf(hit.usage.input_tokens, hit.usage.output_tokens);
+    const { usd, rm } = costOf(hit.usage.input_tokens, hit.usage.output_tokens, hit.model);
     return {
       result: validate(hit.result),
       usage: {
@@ -388,13 +406,15 @@ export async function cachedCall<T>(
         `Run "npm run extract-fixtures" first (it shows the estimated cost and asks for confirmation).`,
     );
   }
-  const { result, usage, model } = await callStructured(pdf, system, userText, schema, validate, maxTokens);
-  writeCache(fileHash, kind, { model, prompt_version: PROMPT_VERSION, kind, usage, result });
-  const { usd, rm } = costOf(usage.input_tokens, usage.output_tokens);
+  const { result, usage, model: usedModel } = await callStructured(
+    pdf, system, userText, schema, validate, maxTokens, model,
+  );
+  writeCache(fileHash, kind, { model: usedModel, prompt_version: PROMPT_VERSION, kind, usage, result });
+  const { usd, rm } = costOf(usage.input_tokens, usage.output_tokens, usedModel);
   return {
     result,
     usage: {
-      model, tokensIn: usage.input_tokens, tokensOut: usage.output_tokens,
+      model: usedModel, tokensIn: usage.input_tokens, tokensOut: usage.output_tokens,
       estCostUsd: usd, estCostRm: rm, fromCache: false,
     },
   };
@@ -405,6 +425,15 @@ export async function cachedCall<T>(
 export interface Extractor {
   gate(pdf: Buffer, fileHash: string): Promise<LlmCallOutcome<GateResult>>;
   extract(pdf: Buffer, fileHash: string, feedback: string | null): Promise<LlmCallOutcome<ExtractionResult>>;
+  /** Reconciliation-failure fallback: re-extract on the stronger MODEL. Cached
+   *  in its own slot so it never collides with the primary Haiku extraction. */
+  escalate(pdf: Buffer, fileHash: string, feedback: string): Promise<LlmCallOutcome<ExtractionResult>>;
+}
+
+function extractUserText(feedback: string | null): string {
+  return feedback
+    ? `Extract the statement data.\n\nIMPORTANT — a previous extraction FAILED arithmetic reconciliation:\n${feedback}\nRe-examine the statement carefully, paying particular attention to missed rows, sign errors (CR vs DR), and two-line FX entries that must be a single transaction.`
+    : "Extract the statement data.";
 }
 
 export class CachingExtractor implements Extractor {
@@ -419,14 +448,39 @@ export class CachingExtractor implements Extractor {
     fileHash: string,
     feedback: string | null,
   ): Promise<LlmCallOutcome<ExtractionResult>> {
+    // Primary extraction runs on the cheaper EXTRACT_MODEL (Haiku). Existing
+    // cached entries (made on the stronger MODEL during backfill) are reused
+    // as-is on a cache hit; only new files are extracted on Haiku.
     const kind = feedback ? "reparse" : "extract";
-    const userText = feedback
-      ? `Extract the statement data.\n\nIMPORTANT — a previous extraction FAILED arithmetic reconciliation:\n${feedback}\nRe-examine the statement carefully, paying particular attention to missed rows, sign errors (CR vs DR), and two-line FX entries that must be a single transaction.`
-      : "Extract the statement data.";
-    return cachedCall(pdf, fileHash, kind, EXTRACT_PROMPT, userText, EXTRACTION_SCHEMA, (r) =>
-      extractionZ.parse(r),
+    return cachedCall(pdf, fileHash, kind, EXTRACT_PROMPT, extractUserText(feedback), EXTRACTION_SCHEMA, (r) =>
+      extractionZ.parse(r), undefined, EXTRACT_MODEL,
     );
   }
+
+  async escalate(
+    pdf: Buffer,
+    fileHash: string,
+    feedback: string,
+  ): Promise<LlmCallOutcome<ExtractionResult>> {
+    return cachedCall(pdf, fileHash, "escalate", EXTRACT_PROMPT, extractUserText(feedback), EXTRACTION_SCHEMA, (r) =>
+      extractionZ.parse(r), undefined, MODEL,
+    );
+  }
+}
+
+/** Run a fresh extraction with an explicit model, bypassing the disk cache.
+ *  Used only by the model-accuracy test harness (scripts/model-accuracy-test.ts)
+ *  to compare a candidate model against the cached ground truth. Does NOT read
+ *  or write the cache, and does NOT check apiApproved — the caller gates it. */
+export async function extractWithModel(
+  pdf: Buffer,
+  model: string,
+  maxTokens = 32000,
+): Promise<{ result: ExtractionResult; usage: { input_tokens: number; output_tokens: number }; model: string }> {
+  return callStructured(
+    pdf, EXTRACT_PROMPT, "Extract the statement data.", EXTRACTION_SCHEMA,
+    (r) => extractionZ.parse(r), maxTokens, model,
+  );
 }
 
 /** Token-count a fixture set for the FR-17 cost estimate (count_tokens is free). */
@@ -462,7 +516,9 @@ export async function estimateBatchCost(
   }
   const totalIn = perFile.reduce((s, f) => s + f.tokensIn, 0);
   const estOutPerFile = 5000; // generous per-statement output estimate (JSON + thinking)
-  // Each file is gated (same PDF, tiny output) + extracted: roughly 2x input.
-  const { usd, rm } = costOf(totalIn * 2, estOutPerFile * files.length);
-  return { perFile, totalIn, estOutPerFile, usd, rm };
+  // Each file is gated on MODEL (same PDF in, tiny classification out) and
+  // extracted on EXTRACT_MODEL (same PDF in, full JSON out). Priced per model.
+  const gate = costOf(totalIn, 200 * files.length, MODEL);
+  const extract = costOf(totalIn, estOutPerFile * files.length, EXTRACT_MODEL);
+  return { perFile, totalIn, estOutPerFile, usd: gate.usd + extract.usd, rm: gate.rm + extract.rm };
 }
