@@ -22,12 +22,17 @@ function many(v: string | string[] | undefined): string[] {
   return (Array.isArray(v) ? v : [v]).filter((s) => s !== "");
 }
 
-/** default period: the last 12 calendar months including the current one */
+/** default period: year-to-date — 1 Jan of the current year through today.
+ *  Everything on the dashboard (KPIs, monthly chart, all three donuts) is
+ *  driven by this range, and every drill-down link carries it, so a click on
+ *  any category / merchant / card opens the transactions page for the SAME
+ *  period. Changing the date on the dashboard changes the whole page and its
+ *  links together; the transactions page keeps that period until the user
+ *  changes it there. */
 function defaultRange(): { from: string; to: string } {
   const now = new Date();
   const to = now.toISOString().slice(0, 10);
-  const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11, 1))
-    .toISOString().slice(0, 10);
+  const from = `${now.getUTCFullYear()}-01-01`;
   return { from, to };
 }
 
