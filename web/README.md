@@ -64,3 +64,9 @@ Passwordless email-OTP login, DISABLED by default. To enable: set
 sign in; the 6-digit code arrives via Supabase Auth's built-in mailer.
 Locked out? Set `AUTH_ENABLED=0` again. Sessions last 30 days
 (HMAC-signed httpOnly cookie).
+
+> The app verifies a **typed 6-digit code**, so Supabase's "Magic Link" email
+> template must include `{{ .Token }}` (the default template sends a link
+> instead). For the full cloud setup — Vercel Root Directory, the
+> "include files outside root" build option, env vars and this template fix —
+> see [`../DEPLOY.md`](../DEPLOY.md).
