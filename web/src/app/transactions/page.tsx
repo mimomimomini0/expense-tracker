@@ -278,24 +278,45 @@ export default async function TransactionsPage({
       )}
 
       {stats && (
-        <div className="kpi-row stats-strip">
-          <div className="stat-tile">
-            <div className="stat-label">{t("stats.total")}</div>
-            <div className="stat-value">{formatRM(stats.total)}</div>
+        <>
+          <div className="kpi-row stats-strip">
+            <div className="stat-tile">
+              <div className="stat-label">{t("stats.balance")}</div>
+              <div className="stat-value">{formatRM(stats.balance)}</div>
+              <div className="stat-sub">{t("stats.balanceNote")}</div>
+            </div>
+            <div className="stat-tile">
+              <div className="stat-label">{t("stats.average")}</div>
+              <div className="stat-value">{formatRM(stats.average)}</div>
+            </div>
+            <div className="stat-tile">
+              <div className="stat-label">{t("stats.highest")}</div>
+              <div className="stat-value">{formatRM(stats.highest)}</div>
+            </div>
+            <div className="stat-tile">
+              <div className="stat-label">{t("stats.lowest")}</div>
+              <div className="stat-value">{formatRM(stats.lowest)}</div>
+            </div>
           </div>
-          <div className="stat-tile">
-            <div className="stat-label">{t("stats.average")}</div>
-            <div className="stat-value">{formatRM(stats.average)}</div>
+          <div className="kpi-row stats-strip">
+            <div className="stat-tile">
+              <div className="stat-label">{t("stats.spent")}</div>
+              <div className="stat-value">{formatRM(stats.spent)}</div>
+            </div>
+            <div className="stat-tile">
+              <div className="stat-label">{t("stats.paid")}</div>
+              <div className="stat-value">{formatRM(stats.paid)}</div>
+            </div>
+            <div className="stat-tile">
+              <div className="stat-label">{t("stats.refunds")}</div>
+              <div className="stat-value">{formatRM(stats.refunds)}</div>
+            </div>
+            <div className="stat-tile">
+              <div className="stat-label">{t("stats.fees")}</div>
+              <div className="stat-value">{formatRM(stats.fees)}</div>
+            </div>
           </div>
-          <div className="stat-tile">
-            <div className="stat-label">{t("stats.highest")}</div>
-            <div className="stat-value">{formatRM(stats.highest)}</div>
-          </div>
-          <div className="stat-tile">
-            <div className="stat-label">{t("stats.lowest")}</div>
-            <div className="stat-value">{formatRM(stats.lowest)}</div>
-          </div>
-        </div>
+        </>
       )}
 
       <p className="muted export-line">

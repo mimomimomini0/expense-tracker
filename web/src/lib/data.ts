@@ -245,10 +245,14 @@ export async function getRawMerchantList(): Promise<{ key: string; count: number
 
 export interface TxnStats {
   count: number;
-  total: number;   // signed: debits positive, credits negative
+  balance: number; // signed net: debits +, credits − (net effect on the card)
   average: number; // per transaction, signed
   highest: number;
   lowest: number;
+  spent: number;   // purchase + instalment + cash_advance debits (real spending)
+  paid: number;    // payments to the bank (positive magnitude)
+  refunds: number; // refund credits (positive magnitude)
+  fees: number;    // fee_interest charges (positive magnitude)
 }
 
 /** Summary over the ENTIRE filtered set (not just the visible page).
@@ -256,11 +260,11 @@ export interface TxnStats {
  *  category view of pure spending reads exactly as expected. */
 export async function getTransactionStats(filters: TxnFilters): Promise<TxnStats | null> {
   const supabase = getSupabase();
-  type Row = { amount_rm: number; direction: "debit" | "credit"; description_raw?: string };
+  type Row = { amount_rm: number; direction: "debit" | "credit"; txn_type: string; description_raw?: string };
   let rows: Row[] = [];
   for (let from = 0; ; from += 1000) {
     let q = supabase.from("transactions")
-      .select(filters.merchant ? "amount_rm,direction,description_raw" : "amount_rm,direction");
+      .select(filters.merchant ? "amount_rm,direction,txn_type,description_raw" : "amount_rm,direction,txn_type");
     if (filters.card) q = q.eq("card_account_id", Number(filters.card));
     if (filters.categories?.length) q = q.in("category_id", filters.categories.map(Number));
     if (filters.txnTypes?.length) q = q.in("txn_type", filters.txnTypes);
@@ -280,13 +284,22 @@ export async function getTransactionStats(filters: TxnFilters): Promise<TxnStats
   }
   if (rows.length === 0) return null;
   const signed = rows.map((r) => (r.direction === "credit" ? -Number(r.amount_rm) : Number(r.amount_rm)));
-  const total = signed.reduce((a, v) => a + v, 0);
+  const balance = signed.reduce((a, v) => a + v, 0);
+  let spent = 0, paid = 0, refunds = 0, fees = 0;
+  for (const r of rows) {
+    const amt = Number(r.amount_rm);
+    if (r.txn_type === "purchase" || r.txn_type === "instalment" || r.txn_type === "cash_advance") spent += amt;
+    else if (r.txn_type === "payment") paid += amt;
+    else if (r.txn_type === "refund") refunds += amt;
+    else if (r.txn_type === "fee_interest") fees += amt;
+  }
   return {
     count: signed.length,
-    total,
-    average: total / signed.length,
+    balance,
+    average: balance / signed.length,
     highest: Math.max(...signed),
     lowest: Math.min(...signed),
+    spent, paid, refunds, fees,
   };
 }
 

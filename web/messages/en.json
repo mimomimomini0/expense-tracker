@@ -333,10 +333,15 @@
       "pageOf": "Page {page} of {pageCount}"
     },
     "stats": {
-      "total": "Total",
+      "balance": "Balance",
+      "balanceNote": "net effect on the card (spend − paid/refunds)",
       "average": "Average / transaction",
       "highest": "Highest",
-      "lowest": "Lowest"
+      "lowest": "Lowest",
+      "spent": "Total spent",
+      "paid": "Total paid",
+      "refunds": "Total refunds",
+      "fees": "Total fees & interest"
     },
     "export": {
       "csv": "Export CSV",

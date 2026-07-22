@@ -333,10 +333,15 @@
       "pageOf": "第 {page} / {pageCount} 页"
     },
     "stats": {
-      "total": "总额",
+      "balance": "净额",
+      "balanceNote": "对卡片余额的净影响（消费 − 还款/退款）",
       "average": "平均每笔",
       "highest": "最高",
-      "lowest": "最低"
+      "lowest": "最低",
+      "spent": "消费总额",
+      "paid": "还款总额",
+      "refunds": "退款总额",
+      "fees": "费用与利息总额"
     },
     "export": {
       "csv": "导出 CSV",
