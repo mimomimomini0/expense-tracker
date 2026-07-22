@@ -137,6 +137,7 @@
       "ewallet": "电子钱包消费",
       "ewalletOn": "包含",
       "ewalletOff": "不包含",
+      "cardsSelected": "{count, plural, other {已选 # 张卡}}",
       "granularity": "视图",
       "apply": "应用",
       "reset": "重置",
@@ -312,6 +313,8 @@
     "personal": "个人",
     "uncategorized": "未分类",
     "all": "全部",
+    "selectAll": "全选",
+    "deselectAll": "清除",
     "missingProfileTables": "档案数据表尚未建立——请先在 Supabase SQL 编辑器中运行 schema-phase2b.sql，然后刷新本页。",
     "loadError": "数据加载失败：{message}"
   },

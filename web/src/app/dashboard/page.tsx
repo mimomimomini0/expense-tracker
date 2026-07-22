@@ -6,6 +6,7 @@ import { getDisputeAlerts, type DisputeAlert } from "@/lib/flags-data";
 import { cardLabel, formatRM } from "@/lib/format";
 import DisputePanel from "./DisputePanel";
 import PaymentsPanel from "./PaymentsPanel";
+import DetailsAutoClose from "../components/DetailsAutoClose";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,11 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 function first(v: string | string[] | undefined): string | undefined {
   const s = Array.isArray(v) ? v[0] : v;
   return s === undefined || s === "" ? undefined : s;
+}
+
+function many(v: string | string[] | undefined): string[] {
+  if (v === undefined) return [];
+  return (Array.isArray(v) ? v : [v]).filter((s) => s !== "");
 }
 
 /** default period: the last 12 calendar months including the current one */
@@ -97,10 +103,11 @@ function aggregatePeriods(
 export default async function DashboardPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const def = defaultRange();
+  const selectedCards = many(sp.card);
   const filters: DashboardFilters = {
     from: first(sp.from) ?? def.from,
     to: first(sp.to) ?? def.to,
-    card: first(sp.card),
+    cards: selectedCards,
     ewallet: first(sp.ew) !== "0",
   };
 
@@ -212,8 +219,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
 
   const qs = (over: Record<string, string | undefined>) => {
     const params = new URLSearchParams();
+    for (const c of selectedCards) params.append("card", c);
     const merged = {
-      from: filters.from, to: filters.to, card: filters.card,
+      from: filters.from, to: filters.to,
       ew: filters.ewallet ? undefined : "0",
       g: granularity === "month" ? undefined : granularity,
       ...over,
@@ -225,6 +233,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
   return (
     <>
       <h1>{t("title")}</h1>
+      <DetailsAutoClose />
 
       <form className="filters" action="/dashboard">
         <label>
@@ -237,12 +246,28 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
         </label>
         <label>
           {t("filters.card")}
-          <select name="card" defaultValue={filters.card ?? ""}>
-            <option value="">{tc("all")}</option>
-            {cards.map((c) => (
-              <option key={c.id} value={String(c.id)}>{cardLabel(c)}</option>
-            ))}
-          </select>
+          {/* tick-box multi-select (owner request 2026-07-22): include/exclude
+              cards for in-depth per-card analysis */}
+          <details className="multiselect">
+            <summary>
+              {selectedCards.length === 0
+                ? tc("all")
+                : t("filters.cardsSelected", { count: selectedCards.length })}
+            </summary>
+            <div className="multiselect-options">
+              <div className="ms-controls">
+                <button type="button" data-ms-all>{tc("selectAll")}</button>
+                <button type="button" data-ms-none>{tc("deselectAll")}</button>
+              </div>
+              {cards.map((c) => (
+                <label key={c.id} className="multiselect-option">
+                  <span>{cardLabel(c)}</span>
+                  <input type="checkbox" name="card" value={String(c.id)}
+                    defaultChecked={selectedCards.includes(String(c.id))} />
+                </label>
+              ))}
+            </div>
+          </details>
         </label>
         <label>
           {t("filters.ewallet")}

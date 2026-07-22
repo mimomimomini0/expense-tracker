@@ -137,6 +137,7 @@
       "ewallet": "E-wallet spending",
       "ewalletOn": "Included",
       "ewalletOff": "Excluded",
+      "cardsSelected": "{count, plural, one {# card} other {# cards}}",
       "granularity": "View by",
       "apply": "Apply",
       "reset": "Reset",
@@ -312,6 +313,8 @@
     "personal": "Personal",
     "uncategorized": "Uncategorized",
     "all": "All",
+    "selectAll": "Select all",
+    "deselectAll": "Clear",
     "missingProfileTables": "Profile tables are not set up yet — run schema-phase2b.sql in the Supabase SQL editor, then reload this page.",
     "loadError": "Could not load data: {message}"
   },

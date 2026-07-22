@@ -17,7 +17,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const to = sp.get("to") ?? now.toISOString().slice(0, 10);
   const filters = {
     from, to,
-    card: sp.get("card") ?? undefined,
+    cards: sp.getAll("card").filter((c) => c !== ""),
     ewallet: sp.get("ew") !== "0",
   };
 

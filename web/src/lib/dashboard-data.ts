@@ -17,7 +17,7 @@ import { ewalletSectorCategory } from "./ewallet-categories";
 export interface DashboardFilters {
   from: string; // YYYY-MM-DD inclusive
   to: string;   // YYYY-MM-DD inclusive
-  card?: string;      // card_account_id as string
+  cards?: string[];   // card_account_ids as strings; empty = all cards
   ewallet: boolean;   // include e-wallet usage rows
 }
 
@@ -92,7 +92,7 @@ export async function getPeriodSpending(filters: DashboardFilters): Promise<numb
       .select("amount_rm,txn_type,category_id")
       .in("txn_type", ["purchase", "instalment", "cash_advance"])
       .gte("txn_date", filters.from).lte("txn_date", filters.to);
-    if (filters.card) q = q.eq("card_account_id", Number(filters.card));
+    if (filters.cards?.length) q = q.in("card_account_id", filters.cards.map(Number));
     return q.order("id").range(a, b);
   });
   for (const r of rows) {
@@ -100,7 +100,7 @@ export async function getPeriodSpending(filters: DashboardFilters): Promise<numb
     total += Number(r.amount_rm);
   }
 
-  if (filters.ewallet && !filters.card) {
+  if (filters.ewallet && !filters.cards?.length) {
     type Ew = { amount_rm: number };
     const ew = await fetchAll<Ew>((a, b) =>
       supabase.from("ewallet_transactions").select("amount_rm")
@@ -144,7 +144,7 @@ export async function getDashboardData(filters: DashboardFilters): Promise<Dashb
     let q = supabase.from("transactions")
       .select("txn_date,amount_rm,direction,txn_type,category_id,card_account_id,business_tag")
       .gte("txn_date", filters.from).lte("txn_date", filters.to);
-    if (filters.card) q = q.eq("card_account_id", Number(filters.card));
+    if (filters.cards?.length) q = q.in("card_account_id", filters.cards.map(Number));
     return q.order("id").range(a, b);
   });
 
@@ -206,7 +206,7 @@ export async function getDashboardData(filters: DashboardFilters): Promise<Dashb
     addCat(t.category_id, amount);
   }
 
-  if (filters.ewallet && !filters.card) {
+  if (filters.ewallet && !filters.cards?.length) {
     type Ew = { trans_date: string; amount_rm: number; kind: string; sector: string | null };
     const ew = await fetchAll<Ew>((a, b) =>
       supabase.from("ewallet_transactions")
@@ -240,7 +240,7 @@ export async function getDashboardData(filters: DashboardFilters): Promise<Dashb
   if (cardsQ.error) throw new Error(cardsQ.error.message);
   const latest = new Map<number, Sc>();
   for (const sc of (scQ.data ?? []) as unknown as Sc[]) {
-    if (filters.card && sc.card_account_id !== Number(filters.card)) continue;
+    if (filters.cards?.length && !filters.cards.map(Number).includes(sc.card_account_id)) continue;
     const cur = latest.get(sc.card_account_id);
     if (!cur || sc.statement_date > cur.statement_date) latest.set(sc.card_account_id, sc);
   }
