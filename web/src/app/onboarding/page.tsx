@@ -17,10 +17,15 @@ import {
   setCompanyArchived
 } from "./actions";
 import SystemSection from "./SystemSection";
+import StorageSection from "./StorageSection";
 
 export const dynamic = "force-dynamic";
 
-export default async function OnboardingPage() {
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+export default async function OnboardingPage({ searchParams }: { searchParams: SearchParams }) {
+  const sp = await searchParams;
+  const runReconcile = (Array.isArray(sp.reconcile) ? sp.reconcile[0] : sp.reconcile) === "1";
   const locale = await getLocale();
   const t = await getTranslations("onboarding");
   const tc = await getTranslations("common");
@@ -208,6 +213,7 @@ export default async function OnboardingPage() {
         ))}
       </section>
 
+      <StorageSection runReconcile={runReconcile} />
       <SystemSection />
     </>
   );

@@ -26,6 +26,21 @@
       "code": "验证码不正确，请检查后重试。"
     }
   },
+  "storage": {
+    "title": "PDF 存储与核对",
+    "note": "本应用在运行所在的机器上从哪个文件夹读取账单 PDF。（本地模式——云端部署时以 Supabase 存储为准。）",
+    "folder": "PDF 文件夹",
+    "found": "{count, plural, other {该文件夹中有 # 个 PDF}}",
+    "notFound": "此处未找到该文件夹——云端部署时属正常。可在 .env 中设置 FIXTURES_DIR 指向其他位置。",
+    "runReconcile": "运行核对",
+    "matched": "{count, plural, other {# 个 PDF 与已导入账单匹配}}",
+    "newTitle": "新增——磁盘上有但尚未导入（{count}）",
+    "noneNew": "无——所有 PDF 均已导入。",
+    "newHint": "运行 npx tsx scripts/backfill.ts 以导入这些文件（会先显示费用估算）。",
+    "missingTitle": "缺失——已导入但文件已不存在（{count}）",
+    "noneMissing": "无——所有已导入账单的文件仍在。",
+    "missingHint": "这些账单仍保留在数据库和 Supabase 存储中，仅本地文件被删除。"
+  },
   "system": {
     "apiCosts": {
       "title": "API 费用",

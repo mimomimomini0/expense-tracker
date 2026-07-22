@@ -26,6 +26,21 @@
       "code": "That code didn't match. Check it and try again."
     }
   },
+  "storage": {
+    "title": "PDF storage & reconcile",
+    "note": "Where this app reads statement PDFs from on the machine running it. (Local mode — on cloud hosting the source of truth is Supabase storage instead.)",
+    "folder": "PDF folder",
+    "found": "{count, plural, one {# PDF in this folder} other {# PDFs in this folder}}",
+    "notFound": "This folder isn't present here — that's normal on cloud hosting. Set FIXTURES_DIR in .env to point elsewhere.",
+    "runReconcile": "Run reconcile",
+    "matched": "{count, plural, one {# PDF matches an imported statement} other {# PDFs match imported statements}}",
+    "newTitle": "New — on disk, not yet imported ({count})",
+    "noneNew": "None — every PDF is already imported.",
+    "newHint": "Run  npx tsx scripts/backfill.ts  to import these (shows the cost estimate first).",
+    "missingTitle": "Missing — imported, but the file is gone ({count})",
+    "noneMissing": "None — every imported statement still has its file.",
+    "missingHint": "These statements stay in the database and in Supabase storage; only the local file was removed."
+  },
   "system": {
     "apiCosts": {
       "title": "API costs",
