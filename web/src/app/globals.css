@@ -977,6 +977,13 @@ table.data.coverage th.cov-th { text-align: center; }
 .donut-cards { display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-start; }
 .donut-cards > .viz-card, .donut-cards > .donut-col { flex: 1 1 360px; min-width: 0; }
 .donut-col { display: flex; flex-direction: column; gap: 1rem; }
+
+/* card management grouped by bank */
+.card-bank-group { margin-bottom: 0.75rem; }
+.card-bank-name {
+  font-size: 0.9rem; margin: 0.9rem 0 0.35rem; color: var(--accent);
+  border-bottom: 1px solid var(--border); padding-bottom: 0.25rem;
+}
 /* smaller donut inside the side-by-side cards so donut + legend fit tidily */
 .donut-cards .donut { width: 168px; height: 168px; }
 .donut-cards .donut-row { gap: 1rem; }

@@ -86,8 +86,15 @@ export function computeDisputeAlerts(txns: FlagTxnInput[], todayIso: string): Di
     for (const r of st.rows) {
       if (r.direction !== "debit") continue;
       const reasons: FlagReason[] = [];
-      if (!seenBefore.has(merchantOf(r.description))) reasons.push("first_seen");
-      if (r.originalCurrency != null) reasons.push("foreign_currency");
+      // Tightened alarm (owner request): a first-seen merchant OR a foreign
+      // charge alone is normal (travel, new shops). Only the COMBINATION —
+      // a foreign-currency charge from a merchant never seen before — is the
+      // real "did I make this?" signal, so both must hold together.
+      const isFirstSeen = !seenBefore.has(merchantOf(r.description));
+      const isForeign = r.originalCurrency != null;
+      if (isFirstSeen && isForeign) reasons.push("foreign_currency", "first_seen");
+      // Duplicate (same merchant + amount twice on one statement) is an
+      // independent double-charge signal — kept on its own.
       if ((dupCounts.get(`${merchantOf(r.description)}|${r.amount}`) ?? 0) >= 2) {
         reasons.push("duplicate");
       }

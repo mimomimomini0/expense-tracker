@@ -57,13 +57,17 @@ describe("FR-18 on the real fixture set (today pinned to 2026-07-21)", () => {
     }
   });
 
-  it("RHB 2026-07-15: the China-trip FX rows flag, incl. the metro triple-charge", () => {
+  it("RHB 2026-07-15: only FIRST-SEEN foreign merchants flag (tightened), metro still triple", () => {
     const rhb = alerts[1]!;
-    expect(rhb.flagged.length).toBe(6);
+    // Tightened rule: a foreign charge flags only if the merchant is also new.
+    // One prior-seen foreign row that flagged under the old FX-alone rule now
+    // drops out (6 -> 5).
+    expect(rhb.flagged.length).toBe(5);
     const metro = rhb.flagged.filter((f) => f.description.startsWith("ALP*Shenzhen Metro"));
     expect(metro.length).toBe(3);
     for (const m of metro) {
-      expect(m.reasons).toEqual(["first_seen", "foreign_currency", "duplicate"]);
+      // foreign + first-seen (combined) + duplicate double-charge
+      expect(m.reasons).toEqual(["foreign_currency", "first_seen", "duplicate"]);
     }
     expect(rhb.flagged.every((f) => f.reasons.length > 0)).toBe(true);
   });
@@ -87,17 +91,22 @@ describe("FR-18 rules (synthetic)", () => {
     expect(DISPUTE_WINDOW_DAYS).toBe(14);
   });
 
-  it("first_seen compares against EARLIER statements only", () => {
+  it("tightened alarm: flags a foreign charge from a first-seen merchant — neither condition alone", () => {
     const rows = [
+      // known merchant, seen in June (earlier statement)
       txn({ id: 1, statementId: 1, statementDate: "2026-06-15", txnDate: "2026-06-01" }),
-      txn({ id: 2, statementId: 2, statementDate: "2026-07-15", txnDate: "2026-07-01" }),
-      txn({ id: 3, statementId: 2, statementDate: "2026-07-15", txnDate: "2026-07-02", description: "BRAND NEW SHOP KL MY", amount: toSen(99) }),
+      // known merchant + foreign -> NOT flagged (not first-seen)
+      txn({ id: 2, statementId: 2, statementDate: "2026-07-15", txnDate: "2026-07-02", originalCurrency: "SGD" }),
+      // first-seen but domestic -> NOT flagged
+      txn({ id: 3, statementId: 2, statementDate: "2026-07-15", txnDate: "2026-07-03", description: "NEW LOCAL SHOP KL MY", amount: toSen(99) }),
+      // first-seen AND foreign -> flagged
+      txn({ id: 4, statementId: 2, statementDate: "2026-07-15", txnDate: "2026-07-04", description: "TOKYO IZAKAYA JP", amount: toSen(150), originalCurrency: "JPY" }),
     ];
     const alerts = computeDisputeAlerts(rows, "2026-07-20");
     expect(alerts.length).toBe(1); // June window closed
     const flagged = alerts[0]!.flagged;
-    expect(flagged.map((f) => f.id)).toEqual([3]); // Starbucks known from June
-    expect(flagged[0]!.reasons).toEqual(["first_seen"]);
+    expect(flagged.map((f) => f.id)).toEqual([4]);
+    expect(flagged[0]!.reasons).toEqual(["foreign_currency", "first_seen"]);
   });
 
   it("duplicate needs same merchant AND same amount; credits are never flagged", () => {

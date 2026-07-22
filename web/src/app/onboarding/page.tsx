@@ -173,13 +173,18 @@ export default async function OnboardingPage({ searchParams }: { searchParams: S
 
         {cards.length === 0 && <p className="muted">{t("cards.empty")}</p>}
 
-        {cards.map((card) => (
+        {/* group by bank — one statement from a bank usually covers all its
+            cards, so they belong together */}
+        {[...new Map(cards.map((c) => [c.bank_name, null])).keys()].map((bank) => (
+        <div className="card-bank-group" key={bank}>
+          <h3 className="card-bank-name">{bank}</h3>
+          {cards.filter((c) => c.bank_name === bank).map((card) => (
           <form action={saveCardSettings} className="row-form" key={card.id}>
             <input type="hidden" name="id" value={card.id} />
             <span className="grow">
-              {/* bank name + last4 are raw data — never translated */}
+              {/* card label + last4 are raw data — never translated */}
               <strong>{cardLabel(card)}</strong>
-              <span className="muted"> ({card.bank_name} ••{card.last4})</span>
+              <span className="muted"> ••{card.last4}</span>
             </span>
             <label className="stack-label">
               {t("cards.displayName")}
@@ -210,6 +215,8 @@ export default async function OnboardingPage({ searchParams }: { searchParams: S
             </label>
             <button type="submit">{t("cards.save")}</button>
           </form>
+          ))}
+        </div>
         ))}
       </section>
 
